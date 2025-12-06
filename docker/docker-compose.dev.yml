@@ -1,0 +1,51 @@
+version: '3.8'
+
+x-app-common: &app_common_tpl
+  image: books-recommender:${DEV_IMAGE_TAG}
+  pull_policy: never
+  build:
+    context: ..
+    dockerfile: docker/image-app/Dockerfile
+    target: dev
+    args:
+      U_ID: ${U_ID:-1000}
+    tags:
+      - books-recommender:${USER}-latest
+  env_file:
+    - ../config.dev.env
+    - ../.env
+  environment:
+    SYMFONY_ENV: ${APP_ENV}
+  volumes:
+    - ${COMPOSER_CONFIG_HOME}:/home/default/.composer:ro
+    - cache-composer:/var/cache/composer
+    - ${CODE_DIR}:/srv/www/app/
+
+x-qdrant-common: &qdrant_common_tpl
+    image: qdrant/qdrant:v1.16
+    env_file:
+        - ../config.dev.env
+        - ../.env
+    environment:
+        SYMFONY_ENV: ${APP_ENV}
+    ports:
+        - 6333:6333
+
+services:
+  app:
+    <<: *app_common_tpl
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${DEV_PROJECT_NAME}-app.ruleSyntax=v3"
+      - "traefik.http.routers.${DEV_PROJECT_NAME}-app.rule=Host(`books-recommender.${DEV_DOMAIN_SUFFIX}`)"
+      - "traefik.http.services.${DEV_PROJECT_NAME}-app.loadbalancer.server.port=80"
+  qdrant:
+      <<: *qdrant_common_tpl
+      labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.${DEV_PROJECT_NAME}-qdrant.ruleSyntax=v3"
+          - "traefik.http.routers.${DEV_PROJECT_NAME}-qdrant.rule=Host(`books-recommender-qdrant.${DEV_DOMAIN_SUFFIX}`)"
+          - "traefik.http.services.${DEV_PROJECT_NAME}-qdrant.loadbalancer.server.port=80"
+
+volumes:
+  cache-composer:

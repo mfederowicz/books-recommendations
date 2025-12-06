@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home - Books Recommender{% endblock %}
+
+{% block body %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Welcome to Books Recommender
+        </h1>
+        <p class="text-xl text-gray-600 mb-8">
+            Discover your next favorite book with AI-powered recommendations
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <!-- Feature Card 1 -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Smart Recommendations</h3>
+                            <p class="mt-1 text-sm text-gray-500">AI-powered book suggestions based on your preferences</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Card 2 -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Fast Search</h3>
+                            <p class="mt-1 text-sm text-gray-500">Quick and efficient book discovery across our database</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Card 3 -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Personalized</h3>
+                            <p class="mt-1 text-sm text-gray-500">Tailored recommendations that match your reading style</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <a href="{{ path('app_login') }}"
+               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                Get Started
+                <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

@@ -1,0 +1,12 @@
+acl
+bc
+curl
+git
+jq
+libicu-dev
+libzip-dev
+locales
+mc
+openssh-client
+unzip
+

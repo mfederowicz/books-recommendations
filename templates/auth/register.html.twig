@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register - Books Recommender{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Join Books Recommender and discover your next favorite book
+            </p>
+        </div>
+
+        <div class="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+            {{ form_start(form, {
+                'attr': {
+                    'class': 'space-y-6',
+                    'hx-post': path('app_register'),
+                    'hx-target': '#response-area',
+                    'hx-swap': 'innerHTML'
+                }
+            }) }}
+
+                <div id="response-area">
+                    {% for error in form.vars.errors %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {{ error.message }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form_label(form.email, 'Email address', {
+                        'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
+                    }) }}
+                    <div class="mt-1">
+                        {{ form_widget(form.email, {
+                            'attr': {
+                                'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                'placeholder': 'Enter your email'
+                            }
+                        }) }}
+                        {{ form_errors(form.email, {
+                            'attr': {'class': 'mt-2 text-sm text-red-600 block'}
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ form_label(form.password.first, 'Password', {
+                        'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
+                    }) }}
+                    <div class="mt-1">
+                        {{ form_widget(form.password.first, {
+                            'attr': {
+                                'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                'placeholder': 'Enter your password (min. 8 characters)'
+                            }
+                        }) }}
+                        {{ form_errors(form.password.first, {
+                            'attr': {'class': 'mt-2 text-sm text-red-600 block'}
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ form_label(form.password.second, 'Confirm Password', {
+                        'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
+                    }) }}
+                    <div class="mt-1">
+                        {{ form_widget(form.password.second, {
+                            'attr': {
+                                'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                'placeholder': 'Confirm your password'
+                            }
+                        }) }}
+                        {{ form_errors(form.password, {
+                            'attr': {'class': 'mt-2 text-sm text-red-600 block'}
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Create Account
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">
+                        Registration is currently available. Login functionality will be added soon.
+                    </p>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

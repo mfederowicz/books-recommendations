@@ -1,0 +1,13 @@
+parameters:
+    level: max
+
+    paths:
+        - src/
+        - tests/
+
+    # Valid settings in current PHPStan
+
+    ignoreErrors:
+        #- '#Access to an undefined property App\\Entity\\#'
+        #- '#^Constructor of class .* has an unused parameter \$.+#'
+

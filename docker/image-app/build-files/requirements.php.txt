@@ -1,0 +1,8 @@
+bcmath
+intl
+opcache
+pcntl
+pdo_mysql
+sockets
+pcov
+zip

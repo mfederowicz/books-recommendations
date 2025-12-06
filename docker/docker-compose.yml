@@ -1,0 +1,30 @@
+version: '3.8'
+
+x-common: &common_tpl
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "2m"
+      max-file: "10"
+
+services:
+
+  app:
+    <<: *common_tpl
+    image: books-recommender:${USER}-latest
+    environment:
+      RUN_APP: apache
+    networks:
+      default:
+      proxy:
+
+  qdrant:
+      <<: *common_tpl
+      image: qdrant/qdrant
+      networks:
+        default:
+        proxy:
+
+networks:
+  proxy:
+    external: true

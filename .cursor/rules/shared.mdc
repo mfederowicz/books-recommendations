@@ -1,0 +1,59 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# AI Rules for books recommender
+
+Books recommender
+
+## Tech Stack
+
+- PHP 8.4
+- Symfony 8.0
+- MySQL 8.4
+- HTMX
+
+## Project Structure
+
+When introducing changes to the project, always follow the directory structure below:
+
+- `./src` - source code
+- `./src/Controller` - Controllers for app endpoints
+- `./src/Entity` - Doctrine entities (database models)
+- `./src/Form` - Forms classes
+- `./src/DTO` - Data Transfer Objects for API requests and responses
+- `./src/EventListener` - Global event listeners (e.g., exception handling)
+- `./src/Exception` - Custom exception classes
+- `./public` - public assets
+
+When modifying the directory structure, always update this section.
+
+## Coding practices
+
+### Guidelines for clean code
+
+1. **Always use environment variables** - Do not hardcode variables depends of environment like URL-s, tokens
+
+2. **Always use type parameters** - When You make new function with parameters all parameters must have declared types
+
+3. **Always declare return type of functions** - When function return result always declare type of the result
+
+4. **Always use Domain-Driven Design (DDD)** - use interfaces
+
+5. **Always write test** - when You add new futures always write test for this futures
+
+6. **Try Do not use Argument::any() in tests** - when You test methods call try to pass real variables
+
+7. **Always use symfony frameworks components** - for example do not use $_GET, $_POST instance of it use symfony
+    component Symfony\Component\HttpFoundation
+
+8. Class name must be the same as a filename
+
+9. Declarations of methods must be always compatible with interfaces
+
+10. Always write tests
+
+11. Test results should not have Deprecations
+
+12. Always declare nullable variables at the end of methods parameters list
