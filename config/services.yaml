@@ -35,3 +35,7 @@ services:
     App\Service\TagService: ~
 
     App\Service\OpenAIEmbeddingClient: ~
+
+    App\Service\QdrantClient: ~
+
+    App\Service\EbookEmbeddingService: ~

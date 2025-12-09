@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\DTO\OpenAIEmbeddingClientInterface;
+use App\DTO\QdrantClientInterface;
 use App\DTO\RecommendationServiceInterface;
 use App\DTO\TextNormalizationServiceInterface;
 use App\Entity\Recommendation;
@@ -20,6 +21,7 @@ final class RecommendationService implements RecommendationServiceInterface
         private EntityManagerInterface $entityManager,
         private TagRepository $tagRepository,
         private OpenAIEmbeddingClientInterface $openAIEmbeddingClient,
+        private EbookEmbeddingService $ebookEmbeddingService,
     ) {
     }
 
@@ -65,6 +67,33 @@ final class RecommendationService implements RecommendationServiceInterface
     }
 
     /**
+     * Znajdź podobne rekomendacje na podstawie tekstu za pomocą wyszukiwania wektorowego w Qdrant.
+     *
+     * @param string $text Tekst do wyszukania podobnych rekomendacji
+     * @param int $limit Maksymalna liczba wyników
+     * @param int|null $userId ID użytkownika (opcjonalne filtrowanie)
+     *
+     * @return array Lista podobnych rekomendacji z wynikami podobieństwa
+     */
+    /**
+     * Znajdź podobne książki na podstawie tekstu rekomendacji za pomocą wyszukiwania wektorowego w Qdrant.
+     * Używa embeddingu użytkownika do wyszukania podobnych książek w kolekcji ebooków.
+     *
+     * @param string $text   Tekst rekomendacji użytkownika do wyszukania podobnych książek
+     * @param int    $limit  Maksymalna liczba wyników
+     *
+     * @return array Lista podobnych książek z wynikami podobieństwa
+     */
+    public function findSimilarEbooks(string $text, int $limit = 10): array
+    {
+        // Pobierz embedding dla tekstu rekomendacji użytkownika
+        $queryEmbedding = $this->openAIEmbeddingClient->getEmbedding($text);
+
+        // Wyszukaj podobne książki w Qdrant używając embeddingu użytkownika
+        return $this->ebookEmbeddingService->findSimilarEbooks($queryEmbedding, $limit);
+    }
+
+    /**
      * Znajdź rekomendację dla danego użytkownika i hash tekstu.
      */
     private function findRecommendationByUserAndHash(int $userId, string $hash): ?Recommendation
@@ -103,7 +132,8 @@ final class RecommendationService implements RecommendationServiceInterface
 
     /**
      * Zapewnia, że embedding istnieje dla danego hash tekstu
-     * Jeśli nie istnieje, pobiera go z OpenAI i zapisuje w bazie.
+     * Jeśli nie istnieje, pobiera go z OpenAI i zapisuje w bazie danych.
+     * Embeddingi użytkowników są przechowywane tylko w MySQL dla optymalizacji zasobów.
      */
     private function ensureEmbeddingExists(string $hash, string $originalText): void
     {
@@ -118,7 +148,7 @@ final class RecommendationService implements RecommendationServiceInterface
         // Pobierz embedding z OpenAI
         $embedding = $this->openAIEmbeddingClient->getEmbedding($originalText);
 
-        // Zapisz embedding w bazie
+        // Zapisz embedding tylko w bazie danych (nie w Qdrant - optymalizacja zasobów)
         $recommendationEmbedding = new RecommendationEmbedding();
         $recommendationEmbedding->setNormalizedTextHash($hash);
         $recommendationEmbedding->setDescription($originalText);
@@ -127,4 +157,5 @@ final class RecommendationService implements RecommendationServiceInterface
         $this->entityManager->persist($recommendationEmbedding);
         $this->entityManager->flush();
     }
+
 }

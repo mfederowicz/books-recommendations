@@ -34,4 +34,15 @@ interface RecommendationServiceInterface
      * @return Tag|null Znaleziony tag lub null
      */
     public function findTagByName(string $name): ?Tag;
+
+    /**
+     * Znajdź podobne książki na podstawie tekstu rekomendacji za pomocą wyszukiwania wektorowego w Qdrant.
+     * Używa embeddingu użytkownika do wyszukania podobnych książek w kolekcji ebooków.
+     *
+     * @param string $text   Tekst rekomendacji użytkownika do wyszukania podobnych książek
+     * @param int    $limit  Maksymalna liczba wyników
+     *
+     * @return array Lista podobnych książek z wynikami podobieństwa
+     */
+    public function findSimilarEbooks(string $text, int $limit = 10): array;
 }
