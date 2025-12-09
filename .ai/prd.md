@@ -33,7 +33,7 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Tytuł:** Logowanie do konta
 - **Opis:** Użytkownik powinien być w stanie zalogować się do aplikacji, co umożliwi dostęp do spersonalizowanych rekomendacji i zapisanych preferencji.
 - **Kryteria akceptacji:**
-    - Podanie loginu i hasła przekierowauje do formularza rekomendacji na górze strony i listy rekomendacji poniżej.
+    - **Status: ✓** - Podanie loginu i hasła przekierowauje do formularza rekomendacji na górze strony i listy rekomendacji poniżej.
     - **Status: ✓** - Błędne dane zwracają komunikat o niepowodzeniu logowania.
     - **Status: ✓** - Po poprawnym logowaniu sesja utrzymuje się przez min 12h.
     - **Status: ✓** - Wielokrotne próby logowania ze złym hasłem powinny skutkować zapisem takiego eventu w tabeli users_failed_logins, oraz blokadę logowania na wybrany okres czasu.
@@ -50,8 +50,8 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Tytuł:** Wylogowanie z konta
 - **Opis:** Użytkownik powinien być w stanie wylogować się z aplikacji.
 - **Kryteria akceptacji:**
-    - Wylogowanie usuwa wszelkie ślady sesji użytkownika.
-    - Po wylogowaniu widać tylko formularz logowania, nie można dostać się do innych sekcji.
+    **Status: ✓** - Wylogowanie usuwa wszelkie ślady sesji użytkownika.
+    **Status: ✓** - Po wylogowaniu widać tylko formularz logowania, nie można dostać się do innych sekcji.
 
 ### US-005: Wprowadzanie opisu książki
 - **Tytuł:** Dodawanie opisu książki w celu uzyskania rekomendacji
