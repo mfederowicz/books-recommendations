@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\LoginThrottlingServiceInterface;
 use App\Entity\User;
 use App\Form\RegisterUserAccount;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,15 +21,18 @@ final class AuthController extends AbstractController
     private EntityManagerInterface $entityManager;
     private UserPasswordHasherInterface $passwordHasher;
     private UserAuthenticatorInterface $userAuthenticator;
+    private LoginThrottlingServiceInterface $loginThrottlingService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
         UserAuthenticatorInterface $userAuthenticator,
+        LoginThrottlingServiceInterface $loginThrottlingService,
     ) {
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
         $this->userAuthenticator = $userAuthenticator;
+        $this->loginThrottlingService = $loginThrottlingService;
     }
 
     #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
@@ -61,7 +65,7 @@ final class AuthController extends AbstractController
         ]);
     }
 
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -69,9 +73,25 @@ final class AuthController extends AbstractController
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // Check if user is blocked due to failed login attempts
+        $throttlingError = null;
+        if ($lastUsername && $this->loginThrottlingService->isUserBlocked($lastUsername)) {
+            $blockedUntil = $this->loginThrottlingService->getBlockedUntil($lastUsername);
+            $throttlingError = sprintf(
+                'Konto zostało tymczasowo zablokowane z powodu zbyt wielu nieudanych prób logowania. Spróbuj ponownie po %s.',
+                $blockedUntil ? $blockedUntil->format('H:i:s') : 'pewnym czasie'
+            );
+        }
+
+        // If there was a login error, record the failed attempt
+        if ($error && $lastUsername) {
+            $this->loginThrottlingService->recordFailedLoginAttempt($lastUsername, $request->getClientIp());
+        }
+
         return $this->render('auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
+            'throttling_error' => $throttlingError,
         ]);
     }
 }

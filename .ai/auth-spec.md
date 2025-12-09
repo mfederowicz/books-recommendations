@@ -54,7 +54,8 @@ Całość opiera się na standardowych mechanizmach Symfony 8.x, z rozszerzeniem
 
 ### Obsługa wyjątków:
 - Custom exceptions: `AuthException` (extends Exception) dla błędów jak &quot;Email exists&quot; lub &quot;Invalid credentials&quot;. W controllery: try-catch, log via Symfony Logger, return Response z status 400 + partial błędu.
-- Global: W `Kernel.php` listener na Security events (np. AuthenticationFailureEvent) dla błędów logowania. Dla resetu: Komenda konsolowa rzuca wyjątek jeśli email nie istnieje.
+- Global: W `Kernel.php` listener na Security events (np. AuthenticationFailureEvent) dla błędów logowania. 
+- Dla resetu hasła: Komenda konsolowa rzuca wyjątek jeśli email nie istnieje.
 
 ### Aktualizacja renderowania stron server-side:
 - `DefaultController::index`: Dodaj check `$user = $this-&gt;getUser();` – jeśli null, render `homepage.html.twig` z auth-form partial; else, render z recommendations partial (fetch z Repository). Użyj Twig includes dla modularności. Routes.yaml bez zmian – tylko import nowych auth routes.

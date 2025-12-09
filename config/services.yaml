@@ -7,6 +7,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    login_throttling.max_attempts: 5
+    login_throttling.block_duration_minutes: 15
+    login_throttling.reset_attempts_after_minutes: 60
 
 services:
     # default configuration for services in *this* file
@@ -21,3 +24,10 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Service\LoginThrottlingService:
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '%login_throttling.max_attempts%'
+            - '%login_throttling.block_duration_minutes%'
+            - '%login_throttling.reset_attempts_after_minutes%'
