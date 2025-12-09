@@ -21,6 +21,12 @@ app_login:
     controller: App\Controller\AuthController::login
     methods: [GET, POST]
 
+# API routes
+api_tags_search:
+    path: /api/tags
+    controller: App\Controller\ApiController::searchTags
+    methods: [GET]
+
 # Handle Chrome DevTools and other .well-known requests
 well_known:
     path: /.well-known/{path}

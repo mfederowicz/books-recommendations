@@ -59,8 +59,10 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Kryteria akceptacji:**
   - Użytkownik po zalogowaniu (US-002) może wypełnić formularz dodania nowej rekomendacji.
   - Formularz nie przyjmuje opisu krótszego niż 30 znaków ani dłuższego niż 500 znaków.
-  - Oprócz opisu użytkownik wybiera z listy tagów min 5-15 tagów.
-  - Wprowadzenie opisu i wybranie listy tagów, po normalizacji opisu sprawdzamy czy taka rekomendacja już nie istnieje(encja recommendations_embeddings), jeżeli nie istnieje pobieranany jest zestaw danych z openai i zapisywany w bazie.
+  - Oprócz opisu użytkownik wybiera z listy tagów min 5-15 tagów (encja: tags, input do wprowadzania tagów pozwala na wyszukanie z listy tagów pobranych z bazy, oczywiście w tle nie ładujemy całej tabeli do pamięci, tylko pobieramy listę tagów w tle ale tylko takich które rozpoczynają się od pierwszych 2 znaków, pobieramy max 30 elementów).
+  - Do normalizacji należy użyć funkcji NormalizationTextHash która będzie dostępna jako service
+  - Po normalizacji opisu sprawdzamy czy taka rekomendacja już nie istnieje(encja recommendations_embeddings), jeżeli nie istnieje pobieranany jest zestaw danych z openai i zapisywany w bazie (encja recommendations_embeddings, oraz encja recommendations (user_id,short_description,normalized_text_hash,created_at,updated_at)), normalized_text_hash - jest hashem sha256 z orginalnego opisu wprowadzonego przez usera.
+  
 
 ### US-006: Wyświetlanie rekomendacji
 - **Tytuł:** Prezentacja rekomendacji książkowych

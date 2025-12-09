@@ -31,3 +31,5 @@ services:
             - '%login_throttling.max_attempts%'
             - '%login_throttling.block_duration_minutes%'
             - '%login_throttling.reset_attempts_after_minutes%'
+
+    App\Service\TagService: ~
