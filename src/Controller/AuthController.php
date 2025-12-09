@@ -78,8 +78,8 @@ final class AuthController extends AbstractController
         if ($lastUsername && $this->loginThrottlingService->isUserBlocked($lastUsername)) {
             $blockedUntil = $this->loginThrottlingService->getBlockedUntil($lastUsername);
             $throttlingError = sprintf(
-                'Konto zostało tymczasowo zablokowane z powodu zbyt wielu nieudanych prób logowania. Spróbuj ponownie po %s.',
-                $blockedUntil ? $blockedUntil->format('H:i:s') : 'pewnym czasie'
+                'Account has been temporarily blocked due to too many failed login attempts. Try again after %s.',
+                $blockedUntil ? $blockedUntil->format('H:i:s') : 'some time'
             );
         }
 

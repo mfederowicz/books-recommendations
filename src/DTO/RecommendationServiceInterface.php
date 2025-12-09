@@ -10,19 +10,19 @@ use App\Entity\Tag;
 interface RecommendationServiceInterface
 {
     /**
-     * Tworzy nową rekomendację książki lub aktualizuje istniejącą dla danego użytkownika.
+     * Creates a new book recommendation or updates an existing one for a given user.
      *
-     * Logika:
-     * 1. Normalizuje podany tekst i generuje hash
-     * 2. Sprawdza czy istnieje embedding dla tego hash w tabeli recommendations_embeddings
-     * 3. Jeśli istnieje rekomendacja dla tego użytkownika i hash, aktualizuje tagi
-     * 4. Jeśli nie istnieje, tworzy nową rekomendację
+     * Logic:
+     * 1. Normalizes the provided text and generates hash
+     * 2. Checks if embedding exists for this hash in recommendations_embeddings table
+     * 3. If recommendation exists for this user and hash, updates tags
+     * 4. If not exists, creates a new recommendation
      *
-     * @param int    $userId ID użytkownika
-     * @param string $text   Oryginalny tekst rekomendacji
-     * @param int[]  $tagIds Lista ID tagów do przypisania
+     * @param int    $userId User ID
+     * @param string $text   Original recommendation text
+     * @param int[]  $tagIds List of tag IDs to assign
      *
-     * @return Recommendation Utworzona lub zaktualizowana rekomendacja
+     * @return Recommendation Created or updated recommendation
      */
     public function createOrUpdateRecommendation(int $userId, string $text, array $tagIds): Recommendation;
 

@@ -23,7 +23,7 @@ final class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
     }
 
     /**
-     * Pobiera wartość zmiennej środowiskowej z walidacją.
+     * Get environment variable value with validation.
      */
     private function getEnvVar(string $name, ?string $default = null): string
     {
@@ -49,7 +49,7 @@ final class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
             return [];
         }
 
-        // Walidacja tekstów
+        // Validate texts
         foreach ($texts as $text) {
             if (!is_string($text) || empty(trim($text))) {
                 throw new \InvalidArgumentException('All texts must be non-empty strings');

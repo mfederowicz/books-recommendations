@@ -1,109 +1,140 @@
 # Books Recommendations System
 
-Aplikacja do rekomendacji książek oparta na sztucznej inteligencji, wykorzystująca embeddingi OpenAI do dopasowywania preferencji użytkowników.
+An AI-powered book recommendation application using OpenAI embeddings to match user preferences.
 
-## 🚀 Technologie
+## 🚀 Technologies
 
-- **PHP 8.4** - Język backend
-- **Symfony 8.0** - Framework PHP
-- **MySQL 8.4** - Baza danych
-- **HTMX** - Dynamiczne interfejsy bez JavaScript
-- **OpenAI API** - Embeddingi tekstowe (text-embedding-3-small)
+- **PHP 8.4** - Backend language
+- **Symfony 8.0** - PHP framework
+- **MySQL 8.4** - Relational database
+- **Qdrant** - Vector database for fast similarity search
+- **HTMX** - Dynamic interfaces without JavaScript
+- **OpenAI API** - Text embeddings (text-embedding-3-small)
 
-## ✨ Funkcjonalności
+## ✨ Features
 
-### Dla użytkowników:
-- ✅ Rejestracja i logowanie z bezpieczeństwem (throttling, rate limiting)
-- ✅ Tworzenie rekomendacji książkowych z opisem (30-500 znaków)
-- ✅ Automatyczne generowanie embeddingów przez OpenAI API
-- ✅ Wybór tagów z inteligentnym wyszukiwaniem
-- ✅ Wyświetlanie rekomendacji książkowych
+### For users:
+- ✅ Registration and login with security (throttling, rate limiting)
+- ✅ Creating book recommendations with description (30-500 characters)
+- ✅ Automatic embedding generation via OpenAI API
+- ✅ Tag selection with intelligent search
+- ✅ Displaying book recommendations
 
-### Dla administratorów:
-- ✅ Komenda do batch processing embeddingów książek: `app:process:ebook-embeddings`
-- ✅ Zarządzanie użytkownikami
-- ✅ Resetowanie haseł użytkowników
+### For administrators:
+- ✅ Command for batch processing book embeddings: `app:process:ebook-embeddings`
+- ✅ Migration of book embeddings to Qdrant: `app:migrate:ebook-embeddings-to-qdrant`
+- ✅ Testing Qdrant functionality: `app:test:qdrant`
+- ✅ Testing OpenAI embeddings: `app:test:embedding`
+- ✅ User management
+- ✅ Password reset for users
 
-## 🔧 Konfiguracja środowiska
+## 🔧 Environment Setup
 
-### Wymagane zmienne środowiskowe:
+### Required environment variables:
 
 ```bash
 # OpenAI API
 OPENAI_API_KEY=your-openai-api-key-here
 OPENAI_MODEL=text-embedding-3-small
 
-# Baza danych (w config.env)
+# Qdrant Vector Database
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+
+# Database (in config.env)
 DATABASE_URL=mysql://user:password@host:port/database
 ```
 
-### Instalacja:
+### Installation:
 
 ```bash
-# Instalacja zależności
+# Install dependencies
 composer install
 
-# Uruchomienie w Docker
+# Run with Docker
 ./bin/run.sh ./bin/console doctrine:migrations:migrate
 ./bin/run.sh ./bin/console doctrine:fixtures:load
 ./bin/run.sh ./bin/console app:seed:tags
 
-# Uruchomienie serwera
+# Start server
 ./bin/run.sh symfony serve
 ```
 
-## 📊 Architektura
+## 📊 Architecture
 
-### Główne komponenty:
-- **RecommendationService** - Logika biznesowa rekomendacji
-- **OpenAIEmbeddingClient** - Klient API OpenAI do embeddingów
-- **TextNormalizationService** - Normalizacja tekstu użytkowników
-- **TagService** - Zarządzanie tagami
+### Main components:
+- **RecommendationService** - Business logic for recommendations and similar book search
+- **OpenAIEmbeddingClient** - OpenAI API client for generating embeddings
+- **EbookEmbeddingService** - Management of book embeddings in Qdrant
+- **QdrantClient** - Qdrant vector database client
+- **TextNormalizationService** - User text normalization
+- **TagService** - Book tag management
 
-### Baza danych:
-- **users** - Użytkownicy systemu
-- **recommendations** - Rekomendacje użytkowników
-- **recommendations_embeddings** - Embeddingi OpenAI dla rekomendacji
-- **ebooks** - Katalog książek
-- **ebooks_embeddings** - Embeddingi książek dla wyszukiwania
-- **tags** - Tagi kategorii książek
+### Database:
 
-## 🔄 Proces rekomendacji
+#### MySQL (relational data):
+- **users** - System users
+- **recommendations** - User recommendations
+- **recommendations_embeddings** - OpenAI embeddings for user recommendations
+- **ebooks** - Book catalog with metadata
+- **ebooks_embeddings** - Copy of book embeddings (synchronization with Qdrant)
+- **tags** - Book category tags
 
+#### Qdrant (vector database):
+- **ebooks** - Collection of book embeddings for fast vector search
+- **recommendations** - User embeddings (MySQL only for optimization)
+
+## 🔄 Recommendation process
+
+### Tworzenie rekomendacji:
 1. Użytkownik wprowadza opis książki (30-500 znaków)
 2. Tekst jest normalizowany i tworzony hash SHA256
 3. Jeśli embedding nie istnieje, pobierany jest z OpenAI API
-4. Embedding jest cachowany w bazie danych
-5. System wyszukuje podobne książki używając cosine similarity
+4. Embedding jest cachowany w MySQL (`recommendations_embeddings`)
+5. Rekomendacja jest zapisywana z wybranymi tagami
 
-## 🧪 Testowanie
+### Searching for similar books:
+1. An embedding is generated based on the user's recommendation description.
+2. The user's embedding is used as a query to search in Qdrant.
+3. Qdrant returns books with the highest cosine similarity.
+4. The results are filtered and returned to the user.
+
+### Optimization architecture:
+- **User embeddings**: Stored only in MySQL (resource efficient)
+- **Book embeddings**: Synchronized between MySQL and Qdrant (fast lookup)
+- **Search**: Query embedding → Qdrant → cosine similarity → results
+
+## 🧪 Tests
 
 ```bash
-# Wszystkie testy
+# All tests
 ./bin/run.sh ./bin/phpunit
 
-# Testy konkretnego modułu
+# Tests of selected module
 ./bin/run.sh ./bin/phpunit --filter OpenAIEmbeddingClientTest
+./bin/run.sh ./bin/phpunit --filter RecommendationServiceTest
 
-# Pokrycie kodu
+# Integration with external services
+./bin/run.sh ./bin/console app:test:embedding "test text"
+./bin/run.sh ./bin/console app:test:qdrant --create-test-data
+
+# Code coverage
 ./bin/run.sh ./bin/phpunit --coverage-html=var/coverage
 ```
 
-## 📋 Status projektu
+### Data migration:
+```bash
+# Migrate books embeddings to Qdrant
+./bin/run.sh ./bin/console app:migrate:ebook-embeddings-to-qdrant
 
-- ✅ US-001: Rejestracja
-- ✅ US-002: Logowanie
-- ✅ US-003: Reset hasła
-- ✅ US-004: Wylogowanie
-- ✅ US-005: Wprowadzanie opisu książki + OpenAI embeddingi
-- ⏳ US-006: Wyświetlanie rekomendacji
-- ⏳ US-007: Usuwanie rekomendacji
-- ✅ US-008: Batch processing embeddingów książek
+# Check collections stats in Qdrant
+./bin/run.sh ./bin/console app:migrate:ebook-embeddings-to-qdrant --stats-only
+```
 
-## 🤝 Przyczynianie się
+## 🤝 Contributing 
 
-1. Fork projektu
-2. Utwórz branch dla swojej funkcji (`git checkout -b feature/AmazingFeature`)
-3. Commituj zmiany (`git commit -m 'Add some AmazingFeature'`)
-4. Push do branch (`git push origin feature/AmazingFeature`)
-5. Otwórz Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to your branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request

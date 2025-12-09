@@ -40,7 +40,7 @@ final class RecommendationController extends AbstractController
         }
 
         try {
-            // Znajdź tagi po nazwach
+            // Find tags by names
             $tags = [];
             foreach ($tagNames as $tagName) {
                 $tag = $this->recommendationService->findTagByName($tagName);
@@ -55,14 +55,14 @@ final class RecommendationController extends AbstractController
                 ], new Response('', 400));
             }
 
-            // Utwórz rekomendację
+            // Create recommendation
             $recommendation = $this->recommendationService->createOrUpdateRecommendation(
                 $this->getUser()->getId(),
                 $description,
                 array_map(fn ($tag) => $tag->getId(), $tags)
             );
 
-            // Zwróć sukces - HTMX może to obsłużyć
+            // Return success - HTMX can handle this
             return $this->render('components/recommendation_success.html.twig', [
                 'recommendation' => $recommendation,
             ]);

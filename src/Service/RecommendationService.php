@@ -26,28 +26,28 @@ final class RecommendationService implements RecommendationServiceInterface
     }
 
     /**
-     * Tworzy nową rekomendację książki lub aktualizuje istniejącą dla danego użytkownika.
+     * Creates a new book recommendation or updates an existing one for a given user.
      *
-     * Logika:
-     * 1. Normalizuje podany tekst i generuje hash
-     * 2. Sprawdza czy istnieje embedding dla tego hash, jeśli nie - pobiera z OpenAI
-     * 3. Sprawdza czy istnieje rekomendacja dla tego użytkownika i hash
-     * 4. Jeśli istnieje, aktualizuje tagi
-     * 5. Jeśli nie istnieje, tworzy nową rekomendację
+     * Logic:
+     * 1. Normalizes the provided text and generates hash
+     * 2. Checks if embedding exists for this hash, if not - fetches from OpenAI
+     * 3. Checks if recommendation exists for this user and hash
+     * 4. If exists, updates tags
+     * 5. If not exists, creates a new recommendation
      */
     public function createOrUpdateRecommendation(int $userId, string $text, array $tagIds): Recommendation
     {
         $normalizedText = $this->textNormalizationService->normalizeText($text);
         $hash = $this->textNormalizationService->generateHash($normalizedText);
 
-        // Sprawdź czy istnieje embedding dla tego hash, jeśli nie - pobierz z OpenAI
+        // Check if embedding exists for this hash, if not - fetch from OpenAI
         $this->ensureEmbeddingExists($hash, $text);
 
-        // Znajdź istniejącą rekomendację dla tego użytkownika i hash
+        // Find existing recommendation for this user and hash
         $recommendation = $this->findRecommendationByUserAndHash($userId, $hash);
 
         if (null === $recommendation) {
-            // Utwórz nową rekomendację
+            // Create a new recommendation
             $recommendation = new Recommendation();
             $user = $this->entityManager->getReference(\App\Entity\User::class, $userId);
             $recommendation->setUser($user);
@@ -67,33 +67,25 @@ final class RecommendationService implements RecommendationServiceInterface
     }
 
     /**
-     * Znajdź podobne rekomendacje na podstawie tekstu za pomocą wyszukiwania wektorowego w Qdrant.
+     * Find similar books based on recommendation text using vector search in Qdrant.
+     * Uses user embedding to find similar books in the ebooks collection.
      *
-     * @param string $text  Tekst do wyszukania podobnych rekomendacji
-     * @param int    $limit Maksymalna liczba wyników
+     * @param string $text  User recommendation text to search for similar books
+     * @param int    $limit Maximum number of results
      *
-     * @return array Lista podobnych rekomendacji z wynikami podobieństwa
-     */
-    /**
-     * Znajdź podobne książki na podstawie tekstu rekomendacji za pomocą wyszukiwania wektorowego w Qdrant.
-     * Używa embeddingu użytkownika do wyszukania podobnych książek w kolekcji ebooków.
-     *
-     * @param string $text  Tekst rekomendacji użytkownika do wyszukania podobnych książek
-     * @param int    $limit Maksymalna liczba wyników
-     *
-     * @return array Lista podobnych książek z wynikami podobieństwa
+     * @return array List of similar books with similarity scores
      */
     public function findSimilarEbooks(string $text, int $limit = 10): array
     {
-        // Pobierz embedding dla tekstu rekomendacji użytkownika
+        // Get embedding for user recommendation text
         $queryEmbedding = $this->openAIEmbeddingClient->getEmbedding($text);
 
-        // Wyszukaj podobne książki w Qdrant używając embeddingu użytkownika
+        // Search for similar books in Qdrant using user embedding
         return $this->ebookEmbeddingService->findSimilarEbooks($queryEmbedding, $limit);
     }
 
     /**
-     * Znajdź rekomendację dla danego użytkownika i hash tekstu.
+     * Find recommendation for a given user and text hash.
      */
     private function findRecommendationByUserAndHash(int $userId, string $hash): ?Recommendation
     {
@@ -106,7 +98,7 @@ final class RecommendationService implements RecommendationServiceInterface
     }
 
     /**
-     * Znajdź tagi po ID.
+     * Find tags by IDs.
      *
      * @param int[] $tagIds
      *
@@ -122,7 +114,7 @@ final class RecommendationService implements RecommendationServiceInterface
     }
 
     /**
-     * Znajdź tag po nazwie.
+     * Find tag by name.
      */
     public function findTagByName(string $name): ?Tag
     {
@@ -130,9 +122,9 @@ final class RecommendationService implements RecommendationServiceInterface
     }
 
     /**
-     * Zapewnia, że embedding istnieje dla danego hash tekstu
-     * Jeśli nie istnieje, pobiera go z OpenAI i zapisuje w bazie danych.
-     * Embeddingi użytkowników są przechowywane tylko w MySQL dla optymalizacji zasobów.
+     * Ensures that embedding exists for a given text hash.
+     * If it doesn't exist, fetches it from OpenAI and saves it to the database.
+     * User embeddings are stored only in MySQL for resource optimization.
      */
     private function ensureEmbeddingExists(string $hash, string $originalText): void
     {
@@ -141,13 +133,13 @@ final class RecommendationService implements RecommendationServiceInterface
             ->findOneBy(['normalizedTextHash' => $hash]);
 
         if (null !== $existingEmbedding) {
-            return; // Embedding już istnieje
+            return; // Embedding already exists
         }
 
         // Pobierz embedding z OpenAI
         $embedding = $this->openAIEmbeddingClient->getEmbedding($originalText);
 
-        // Zapisz embedding tylko w bazie danych (nie w Qdrant - optymalizacja zasobów)
+        // Save embedding only to database (not to Qdrant - resource optimization)
         $recommendationEmbedding = new RecommendationEmbedding();
         $recommendationEmbedding->setNormalizedTextHash($hash);
         $recommendationEmbedding->setDescription($originalText);
