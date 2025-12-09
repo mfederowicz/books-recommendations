@@ -21,32 +21,27 @@ final class ApiController extends AbstractController
      * Returns active tags starting with the given query (minimum 2 characters)
      */
     #[Route('/api/tags', name: 'api_tags_search', methods: ['GET'])]
-    public function searchTags(Request $request): JsonResponse
+    public function searchTags(Request $request)
     {
         $query = $request->query->get('q', '');
 
         // Validate query length
         if (strlen(trim($query)) < 2) {
-            return new JsonResponse([
-                'tags' => [],
-                'total' => 0
-            ]);
+            return $this->renderTagSuggestions([]);
         }
 
         $tags = $this->tagService->findActiveTagsForAutocomplete($query);
 
-        // Format response
-        $formattedTags = array_map(function ($tag) {
-            return [
-                'id' => $tag->getId(),
-                'name' => $tag->getName(),
-                'ascii' => $tag->getAscii()
-            ];
-        }, $tags);
+        return $this->renderTagSuggestions($tags);
+    }
 
-        return new JsonResponse([
-            'tags' => $formattedTags,
-            'total' => count($formattedTags)
+    /**
+     * Render tag suggestions as HTML fragment for HTMX
+     */
+    private function renderTagSuggestions(array $tags)
+    {
+        return $this->render('components/tag_suggestions.html.twig', [
+            'tags' => $tags
         ]);
     }
 }

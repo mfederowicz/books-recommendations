@@ -33,33 +33,33 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Tytuł:** Logowanie do konta
 - **Opis:** Użytkownik powinien być w stanie zalogować się do aplikacji, co umożliwi dostęp do spersonalizowanych rekomendacji i zapisanych preferencji.
 - **Kryteria akceptacji:**
-    - **Status: ✓** - Podanie loginu i hasła przekierowauje do formularza rekomendacji na górze strony i listy rekomendacji poniżej.
-    - **Status: ✓** - Błędne dane zwracają komunikat o niepowodzeniu logowania.
-    - **Status: ✓** - Po poprawnym logowaniu sesja utrzymuje się przez min 12h.
-    - **Status: ✓** - Wielokrotne próby logowania ze złym hasłem powinny skutkować zapisem takiego eventu w tabeli users_failed_logins, oraz blokadę logowania na wybrany okres czasu.
-    - **Status: ✓** - throttling logowania z maksymalnie 5 próbami, blokadą na 15 minut, automatycznym czyszczeniem po pomyślnym logowaniu.
+    - **Status: ✅** - Podanie loginu i hasła przekierowauje do formularza rekomendacji na górze strony i listy rekomendacji poniżej.
+    - **Status: ✅** - Błędne dane zwracają komunikat o niepowodzeniu logowania.
+    - **Status: ✅** - Po poprawnym logowaniu sesja utrzymuje się przez min 12h.
+    - **Status: ✅** - Wielokrotne próby logowania ze złym hasłem powinny skutkować zapisem takiego eventu w tabeli users_failed_logins, oraz blokadę logowania na wybrany okres czasu.
+    - **Status: ✅** - throttling logowania z maksymalnie 5 próbami, blokadą na 15 minut, automatycznym czyszczeniem po pomyślnym logowaniu.
 
 ### US-003: Resetowanie hasła
 - **Tytuł:** Resetowanie hasła do konta
 - **Opis:** Reset hasła do konta możliwe jest tylko przez administratora.
 - **Kryteria akceptacji:**
-    - **Status: ✓** - Reset hasła realizowany jest przez komendę: security:reset-user-passwd email passwd.
-    - **Status: ✓** - Po resecie hasła możliwe jest zalogowanie bez potrzeby korzystania ze skrzynki email.
+    - **Status: ✅** - Reset hasła realizowany jest przez komendę: security:reset-user-passwd email passwd.
+    - **Status: ✅** - Po resecie hasła możliwe jest zalogowanie bez potrzeby korzystania ze skrzynki email.
 
 ### US-004: Wylogowanie
 - **Tytuł:** Wylogowanie z konta
 - **Opis:** Użytkownik powinien być w stanie wylogować się z aplikacji.
 - **Kryteria akceptacji:**
-    **Status: ✓** - Wylogowanie usuwa wszelkie ślady sesji użytkownika.
-    **Status: ✓** - Po wylogowaniu widać tylko formularz logowania, nie można dostać się do innych sekcji.
+    **Status: ✅** - Wylogowanie usuwa wszelkie ślady sesji użytkownika.
+    **Status: ✅** - Po wylogowaniu widać tylko formularz logowania, nie można dostać się do innych sekcji.
 
 ### US-005: Wprowadzanie opisu książki
 - **Tytuł:** Dodawanie opisu książki w celu uzyskania rekomendacji
 - **Opis:** Użytkownik wprowadza opis książki w intuicyjnym formularzu, którego długość wynosi od 30 do 500 znaków.
 - **Kryteria akceptacji:**
-  - Użytkownik po zalogowaniu (US-002) może wypełnić formularz dodania nowej rekomendacji.
-  - Formularz nie przyjmuje opisu krótszego niż 30 znaków ani dłuższego niż 500 znaków.
-  - Oprócz opisu użytkownik wybiera z listy tagów min 5-15 tagów (encja: tags, input do wprowadzania tagów pozwala na wyszukanie z listy tagów pobranych z bazy, oczywiście w tle nie ładujemy całej tabeli do pamięci, tylko pobieramy listę tagów w tle ale tylko takich które rozpoczynają się od pierwszych 2 znaków, pobieramy max 30 elementów).
+  - **Status: ✅** Użytkownik po zalogowaniu (US-002) może wypełnić formularz dodania nowej rekomendacji.
+  - **Status: ✅** Formularz nie przyjmuje opisu krótszego niż 30 znaków ani dłuższego niż 500 znaków.
+  - **Status: ✅** Oprócz opisu użytkownik wybiera z listy tagów min 5-15 tagów (encja: tags, input do wprowadzania tagów pozwala na wyszukanie z listy tagów pobranych z bazy, oczywiście w tle nie ładujemy całej tabeli do pamięci, tylko pobieramy listę tagów w tle ale tylko takich które rozpoczynają się od pierwszych 2 znaków, pobieramy max 30 elementów).
   - Do normalizacji należy użyć funkcji NormalizationTextHash która będzie dostępna jako service
   - Po normalizacji opisu sprawdzamy czy taka rekomendacja już nie istnieje(encja recommendations_embeddings), jeżeli nie istnieje pobieranany jest zestaw danych z openai i zapisywany w bazie (encja recommendations_embeddings, oraz encja recommendations (user_id,short_description,normalized_text_hash,created_at,updated_at)), normalized_text_hash - jest hashem sha256 z orginalnego opisu wprowadzonego przez usera.
   

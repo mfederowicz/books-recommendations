@@ -1,0 +1,10 @@
+<div class="py-1">
+  {% for tag in tags %}
+  <div
+    class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+    onclick="selectTagSuggestion('{{ tag.name }}')"
+  >
+    {{ tag.name }}
+  </div>
+  {% endfor %}
+</div>

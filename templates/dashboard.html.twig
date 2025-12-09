@@ -35,37 +35,55 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Select tags (minimum 2)
+              Select tags <span class="text-red-500">*</span> (minimum 2)
             </label>
             <div class="flex flex-wrap gap-2" id="tag-container">
               <!-- Tags will appear here -->
             </div>
-            <div class="mt-2 flex gap-3 max-w-full">
-              <input
-                type="text"
-                id="tag-input"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Type a tag and press Enter..."
-              >
+            <div class="mt-2 max-w-full">
+              <div class="flex gap-3 items-end relative">
+                <div class="flex-1 relative">
+                  <input
+                    type="text"
+                    id="tag-input"
+                    name="q"
+                    class="h-11 w-full px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 flex items-center"
+                    placeholder="Type a tag and press Enter..."
+                    hx-get="/api/tags"
+                    hx-target="#tag-suggestions"
+                    hx-trigger="input changed delay:300ms"
+                    hx-include="[name='q']"
+                  >
+                  <div id="tag-loading" class="htmx-indicator absolute right-3 top-3">
+                    <svg class="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                </div>
               <button
                 type="button"
-                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="h-11 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap flex items-center justify-center"
                 id="reset-btn"
               >
                 Reset
               </button>
               <button
                 type="submit"
-                class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="h-11 inline-flex items-center justify-center px-6 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 id="submit-btn"
                 disabled
               >
-                <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white hidden" id="loading-spinner" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Find Recommendations
-              </button>
+                  <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white hidden" id="loading-spinner" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Find Recommendations
+                </button>
+              </div>
+              <div id="tag-suggestions" class="z-30 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden" style="margin-top: 4px;">
+                <!-- Suggestions will appear here -->
+              </div>
             </div>
           </div>
         </form>
@@ -93,30 +111,100 @@
   </div>
 </div>
 
-{% block javascripts %}
 <script>
 // Liczenie znaków w textarea
 document.getElementById('description').addEventListener('input', function() {
   const count = this.value.length;
   document.getElementById('char-count').textContent = count;
 
-  // Walidacja długości
-  const submitBtn = document.getElementById('submit-btn');
-  const isValidLength = count >= 30 && count <= 500;
-  submitBtn.disabled = !isValidLength;
+  validateForm();
 });
 
-// Funkcjonalność tagów z badge
-document.getElementById('tag-input').addEventListener('keypress', function(e) {
+// Funkcja walidacji formularza
+function validateForm() {
+  const descriptionTextarea = document.getElementById('description');
+  const tagContainer = document.getElementById('tag-container');
+  const submitBtn = document.getElementById('submit-btn');
+
+  const descriptionLength = descriptionTextarea.value.length;
+  const isValidDescription = descriptionLength >= 30 && descriptionLength <= 500;
+
+  const tagCount = tagContainer.children.length;
+  const isValidTags = tagCount >= 2;
+
+  submitBtn.disabled = !(isValidDescription && isValidTags);
+}
+
+// Funkcjonalność tagów z autocomplete
+let currentTagInput = null;
+
+document.getElementById('tag-input').addEventListener('input', function() {
+  currentTagInput = this;
+  const suggestions = document.getElementById('tag-suggestions');
+
+  if (this.value.trim().length >= 2) {
+    suggestions.classList.remove('hidden');
+    // Ustaw szerokość dropdown na szerokość inputa
+    suggestions.style.width = this.offsetWidth + 'px';
+  } else {
+    suggestions.classList.add('hidden');
+  }
+});
+
+// HTMX event listeners
+document.addEventListener('htmx:afterRequest', function(evt) {
+  if (evt.detail.target.id === 'tag-suggestions') {
+    const suggestions = document.getElementById('tag-suggestions');
+    // Sprawdź czy odpowiedź zawiera jakieś tagi (nie pusty div)
+    const response = evt.detail.xhr.response || '';
+    const hasContent = response.trim() !== '' &&
+                      !response.includes('<div class="py-1">') ||
+                      response.includes('onclick="selectTagSuggestion');
+
+    if (hasContent) {
+      suggestions.classList.remove('hidden');
+    } else {
+      suggestions.classList.add('hidden');
+    }
+  }
+});
+
+document.getElementById('tag-input').addEventListener('keydown', function(e) {
+  const suggestions = document.getElementById('tag-suggestions');
+
   if (e.key === 'Enter') {
     e.preventDefault();
     const tagValue = this.value.trim();
     if (tagValue) {
       addTagBadge(tagValue);
       this.value = '';
+      suggestions.classList.add('hidden');
     }
+  } else if (e.key === 'Escape') {
+    suggestions.classList.add('hidden');
   }
 });
+
+// Zamknij sugestie po kliknięciu poza nimi
+document.addEventListener('click', function(e) {
+  const tagInput = document.getElementById('tag-input');
+  const suggestions = document.getElementById('tag-suggestions');
+
+  if (!tagInput.contains(e.target) && !suggestions.contains(e.target)) {
+    suggestions.classList.add('hidden');
+  }
+});
+
+// Funkcja wyboru sugestii tagu
+function selectTagSuggestion(tagName) {
+  const tagInput = document.getElementById('tag-input');
+  const suggestions = document.getElementById('tag-suggestions');
+
+  addTagBadge(tagName);
+  tagInput.value = '';
+  suggestions.classList.add('hidden');
+  tagInput.focus();
+}
 
 // Funkcja dodająca badge tagu
 function addTagBadge(tagValue) {
@@ -147,9 +235,11 @@ function addTagBadge(tagValue) {
   const removeBtn = badge.querySelector('button');
   removeBtn.addEventListener('click', function() {
     badge.remove();
+    validateForm();
   });
 
   tagContainer.appendChild(badge);
+  validateForm();
 }
 
 // Funkcjonalność przycisku Reset
@@ -169,13 +259,11 @@ document.getElementById('reset-btn').addEventListener('click', function() {
   // Zresetuj licznik znaków
   document.getElementById('char-count').textContent = '0';
 
-  // Wyłącz przycisk submit
-  const submitBtn = document.getElementById('submit-btn');
-  submitBtn.disabled = true;
+  // Zresetuj walidację formularza
+  validateForm();
 
   // Zresetuj focus na textarea
   descriptionTextarea.focus();
 });
 </script>
-{% endblock %}
 {% endblock %}
