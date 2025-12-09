@@ -130,3 +130,4 @@ class UserFailedLogin
         return $this;
     }
 }
+

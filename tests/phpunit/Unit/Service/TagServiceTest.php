@@ -102,3 +102,4 @@ final class TagServiceTest extends TestCase
         return $tag;
     }
 }
+

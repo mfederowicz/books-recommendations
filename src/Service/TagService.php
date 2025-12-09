@@ -47,3 +47,4 @@ final class TagService
         return $this->tagRepository->findBy(['active' => true], ['name' => 'ASC']);
     }
 }
+

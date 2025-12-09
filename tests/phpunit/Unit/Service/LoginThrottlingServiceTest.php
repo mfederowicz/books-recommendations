@@ -235,3 +235,4 @@ final class LoginThrottlingServiceTest extends TestCase
         $this->assertEquals(3, $this->service->getFailedAttemptsCount('test@example.com'));
     }
 }
+

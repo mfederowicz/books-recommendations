@@ -88,3 +88,4 @@ final class LoginThrottlingService implements LoginThrottlingServiceInterface
             ->findOneBy(['email' => $email]);
     }
 }
+

@@ -124,3 +124,4 @@ final class SeedTagsCommand extends Command
         return Command::SUCCESS;
     }
 }
+

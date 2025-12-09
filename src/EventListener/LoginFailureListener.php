@@ -35,3 +35,4 @@ final class LoginFailureListener
         $this->loginThrottlingService->recordFailedLoginAttempt($email, $ipAddress);
     }
 }
+
