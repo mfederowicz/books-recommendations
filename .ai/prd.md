@@ -34,10 +34,10 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Opis:** Użytkownik powinien być w stanie zalogować się do aplikacji, co umożliwi dostęp do spersonalizowanych rekomendacji i zapisanych preferencji.
 - **Kryteria akceptacji:**
     - Podanie loginu i hasła przekierowauje do formularza rekomendacji na górze strony i listy rekomendacji poniżej.
-    - Błędne dane zwracają komunikat o niepowodzeniu logowania.
-    - Po poprawnym logowaniu sesja utrzymuje się przez min 12h.
-    - Wielokrotne próby logowania ze złym hasłem powinny skutkować zapisem takiego eventu w tabeli users_failed_logins, oraz blokadę logowania na wybrany okres czasu.
-    - **Status: Zaimplementowane** - throttling logowania z maksymalnie 5 próbami, blokadą na 15 minut, automatycznym czyszczeniem po pomyślnym logowaniu.
+    - **Status: ✓** - Błędne dane zwracają komunikat o niepowodzeniu logowania.
+    - **Status: ✓** - Po poprawnym logowaniu sesja utrzymuje się przez min 12h.
+    - **Status: ✓** - Wielokrotne próby logowania ze złym hasłem powinny skutkować zapisem takiego eventu w tabeli users_failed_logins, oraz blokadę logowania na wybrany okres czasu.
+    - **Status: ✓** - throttling logowania z maksymalnie 5 próbami, blokadą na 15 minut, automatycznym czyszczeniem po pomyślnym logowaniu.
 
 ### US-003: Resetowanie hasła
 - **Tytuł:** Resetowanie hasła do konta
