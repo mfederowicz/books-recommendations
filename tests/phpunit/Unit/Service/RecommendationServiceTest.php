@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Service;
 
+use App\DTO\OpenAIEmbeddingClientInterface;
 use App\DTO\TextNormalizationServiceInterface;
 use App\Entity\Recommendation;
 use App\Entity\Tag;
@@ -18,6 +19,7 @@ final class RecommendationServiceTest extends TestCase
     private TextNormalizationServiceInterface $textNormalizationService;
     private EntityManagerInterface $entityManager;
     private TagRepository $tagRepository;
+    private OpenAIEmbeddingClientInterface $openAIEmbeddingClient;
     private RecommendationService $recommendationService;
 
     protected function setUp(): void
@@ -25,10 +27,30 @@ final class RecommendationServiceTest extends TestCase
         $this->textNormalizationService = $this->createMock(TextNormalizationServiceInterface::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->tagRepository = $this->createMock(TagRepository::class);
+        $this->openAIEmbeddingClient = $this->createMock(OpenAIEmbeddingClientInterface::class);
+
+        // Configure entityManager to return appropriate repositories
+        $recommendationRepository = $this->createMock(EntityRepository::class);
+        $recommendationEmbeddingRepository = $this->createMock(EntityRepository::class);
+
+        $this->entityManager
+            ->method('getRepository')
+            ->willReturnCallback(function ($entityClass) use ($recommendationRepository, $recommendationEmbeddingRepository) {
+                if (Recommendation::class === $entityClass) {
+                    return $recommendationRepository;
+                }
+                if (\App\Entity\RecommendationEmbedding::class === $entityClass) {
+                    return $recommendationEmbeddingRepository;
+                }
+
+                return $this->createMock(EntityRepository::class);
+            });
+
         $this->recommendationService = new RecommendationService(
             $this->textNormalizationService,
             $this->entityManager,
-            $this->tagRepository
+            $this->tagRepository,
+            $this->openAIEmbeddingClient
         );
     }
 
@@ -42,7 +64,7 @@ final class RecommendationServiceTest extends TestCase
 
         $tags = [
             $this->createTag(1, 'fantasy'),
-            $this->createTag(2, 'sci-fi')
+            $this->createTag(2, 'sci-fi'),
         ];
 
         // Mock text normalization
@@ -58,22 +80,31 @@ final class RecommendationServiceTest extends TestCase
             ->with($normalizedText)
             ->willReturn($hash);
 
-        // Mock repository - nie ma istniejącej rekomendacji
-        $recommendationRepository = $this->createMock(EntityRepository::class);
-        $this->entityManager
-            ->expects($this->once())
-            ->method('getRepository')
-            ->with(Recommendation::class)
-            ->willReturn($recommendationRepository);
+        // Configure mock repositories
+        $recommendationRepository = $this->entityManager->getRepository(Recommendation::class);
+        $recommendationEmbeddingRepository = $this->entityManager->getRepository(\App\Entity\RecommendationEmbedding::class);
 
         $recommendationRepository
             ->expects($this->once())
             ->method('findOneBy')
             ->with([
                 'user' => $userId,
-                'normalizedTextHash' => $hash
+                'normalizedTextHash' => $hash,
             ])
             ->willReturn(null);
+
+        $recommendationEmbeddingRepository
+            ->expects($this->once())
+            ->method('findOneBy')
+            ->with(['normalizedTextHash' => $hash])
+            ->willReturn(null);
+
+        // Mock OpenAI client to return embedding
+        $this->openAIEmbeddingClient
+            ->expects($this->once())
+            ->method('getEmbedding')
+            ->with($text)
+            ->willReturn([0.1, 0.2, 0.3]);
 
         // Mock tag finding
         $this->tagRepository
@@ -91,12 +122,15 @@ final class RecommendationServiceTest extends TestCase
             ->willReturn($userMock);
 
         $this->entityManager
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('persist')
-            ->with($this->isInstanceOf(Recommendation::class));
+            ->with($this->logicalOr(
+                $this->isInstanceOf(\App\Entity\RecommendationEmbedding::class),
+                $this->isInstanceOf(Recommendation::class)
+            ));
 
         $this->entityManager
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('flush');
 
         $result = $this->recommendationService->createOrUpdateRecommendation($userId, $text, $tagIds);
@@ -120,7 +154,7 @@ final class RecommendationServiceTest extends TestCase
 
         $tags = [
             $this->createTag(3, 'mystery'),
-            $this->createTag(4, 'thriller')
+            $this->createTag(4, 'thriller'),
         ];
 
         // Mock text normalization
@@ -136,22 +170,30 @@ final class RecommendationServiceTest extends TestCase
             ->with($normalizedText)
             ->willReturn($hash);
 
-        // Mock repository - istnieje rekomendacja
-        $recommendationRepository = $this->createMock(EntityRepository::class);
-        $this->entityManager
-            ->expects($this->once())
-            ->method('getRepository')
-            ->with(Recommendation::class)
-            ->willReturn($recommendationRepository);
+        // Configure mock repositories
+        $recommendationRepository = $this->entityManager->getRepository(Recommendation::class);
+        $recommendationEmbeddingRepository = $this->entityManager->getRepository(\App\Entity\RecommendationEmbedding::class);
 
         $recommendationRepository
             ->expects($this->once())
             ->method('findOneBy')
             ->with([
                 'user' => $userId,
-                'normalizedTextHash' => $hash
+                'normalizedTextHash' => $hash,
             ])
             ->willReturn($existingRecommendation);
+
+        // Mock embedding exists, so no API call needed
+        $recommendationEmbeddingRepository
+            ->expects($this->once())
+            ->method('findOneBy')
+            ->with(['normalizedTextHash' => $hash])
+            ->willReturn($this->createMock(\App\Entity\RecommendationEmbedding::class));
+
+        // OpenAI client should not be called since embedding exists
+        $this->openAIEmbeddingClient
+            ->expects($this->never())
+            ->method('getEmbedding');
 
         // Mock tag finding
         $this->tagRepository
@@ -196,18 +238,27 @@ final class RecommendationServiceTest extends TestCase
             ->with($normalizedText)
             ->willReturn($hash);
 
-        // Mock repository
-        $recommendationRepository = $this->createMock(EntityRepository::class);
-        $this->entityManager
-            ->expects($this->once())
-            ->method('getRepository')
-            ->with(Recommendation::class)
-            ->willReturn($recommendationRepository);
+        // Configure mock repositories
+        $recommendationRepository = $this->entityManager->getRepository(Recommendation::class);
+        $recommendationEmbeddingRepository = $this->entityManager->getRepository(\App\Entity\RecommendationEmbedding::class);
 
         $recommendationRepository
             ->expects($this->once())
             ->method('findOneBy')
             ->willReturn(null);
+
+        $recommendationEmbeddingRepository
+            ->expects($this->once())
+            ->method('findOneBy')
+            ->with(['normalizedTextHash' => $hash])
+            ->willReturn(null);
+
+        // Mock OpenAI client to return embedding
+        $this->openAIEmbeddingClient
+            ->expects($this->once())
+            ->method('getEmbedding')
+            ->with($text)
+            ->willReturn([0.1, 0.2, 0.3]);
 
         // Mock tag finding - nie powinno być wywołane dla pustej tablicy
         $this->tagRepository
@@ -223,11 +274,11 @@ final class RecommendationServiceTest extends TestCase
             ->willReturn($userMock);
 
         $this->entityManager
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('persist');
 
         $this->entityManager
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('flush');
 
         $result = $this->recommendationService->createOrUpdateRecommendation($userId, $text, $tagIds);
@@ -278,6 +329,7 @@ final class RecommendationServiceTest extends TestCase
 
         $tag->setName($name);
         $tag->setActive(true);
+
         return $tag;
     }
 }

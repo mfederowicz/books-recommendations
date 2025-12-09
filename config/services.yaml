@@ -33,3 +33,5 @@ services:
             - '%login_throttling.reset_attempts_after_minutes%'
 
     App\Service\TagService: ~
+
+    App\Service\OpenAIEmbeddingClient: ~

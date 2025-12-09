@@ -88,9 +88,9 @@ final class LoginThrottlingServiceTest extends TestCase
             ->expects($this->once())
             ->method('persist')
             ->with($this->callback(function (UserFailedLogin $failedLogin) {
-                return $failedLogin->getEmail() === 'test@example.com'
-                    && $failedLogin->getAttemptsCount() === 1
-                    && $failedLogin->getIpAddress() === '192.168.1.1';
+                return 'test@example.com' === $failedLogin->getEmail()
+                    && 1 === $failedLogin->getAttemptsCount()
+                    && '192.168.1.1' === $failedLogin->getIpAddress();
             }));
 
         $this->entityManager

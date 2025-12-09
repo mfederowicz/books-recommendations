@@ -63,6 +63,7 @@ class Recommendation
     public function setUser(User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -74,6 +75,7 @@ class Recommendation
     public function setShortDescription(string $shortDescription): self
     {
         $this->shortDescription = $shortDescription;
+
         return $this;
     }
 
@@ -85,6 +87,7 @@ class Recommendation
     public function setNormalizedTextHash(string $normalizedTextHash): self
     {
         $this->normalizedTextHash = $normalizedTextHash;
+
         return $this;
     }
 
@@ -96,6 +99,7 @@ class Recommendation
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -107,6 +111,7 @@ class Recommendation
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 
@@ -135,7 +140,7 @@ class Recommendation
     }
 
     /**
-     * Zamienia wszystkie tagi na nowe
+     * Zamienia wszystkie tagi na nowe.
      *
      * @param Tag[] $tags
      */
@@ -149,3 +154,4 @@ class Recommendation
         return $this;
     }
 }
+

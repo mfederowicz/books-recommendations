@@ -15,9 +15,6 @@ final class DefaultController extends AbstractController
      */
     public function index(): Response
     {
-        // Tymczasowo zawsze pokazuj dashboard dla celów testowych
-        return $this->render('dashboard.html.twig');
-
         if ($this->getUser()) {
             // Zalogowany użytkownik - pokaż dashboard
             return $this->render('dashboard.html.twig');

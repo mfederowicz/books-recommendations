@@ -20,7 +20,7 @@ class TagRepository extends ServiceEntityRepository
 
     /**
      * Find active tags starting with given prefix (case insensitive)
-     * Limited to max results for autocomplete functionality
+     * Limited to max results for autocomplete functionality.
      */
     public function findActiveTagsStartingWith(string $prefix, int $limit = 30): array
     {
@@ -32,7 +32,7 @@ class TagRepository extends ServiceEntityRepository
             ->where('t.active = :active')
             ->andWhere('t.name LIKE :prefix')
             ->setParameter('active', true)
-            ->setParameter('prefix', $prefix . '%')
+            ->setParameter('prefix', $prefix.'%')
             ->orderBy('t.name', 'ASC')
             ->setMaxResults($limit)
             ->getQuery()
@@ -40,7 +40,7 @@ class TagRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find active tags by exact name match (case insensitive)
+     * Find active tags by exact name match (case insensitive).
      */
     public function findActiveTagByName(string $name): ?Tag
     {
@@ -53,4 +53,3 @@ class TagRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 }
-

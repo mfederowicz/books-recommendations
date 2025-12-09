@@ -46,6 +46,7 @@ class RecommendationEmbedding
     public function setNormalizedTextHash(string $normalizedTextHash): self
     {
         $this->normalizedTextHash = $normalizedTextHash;
+
         return $this;
     }
 
@@ -57,6 +58,7 @@ class RecommendationEmbedding
     public function setDescription(string $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -68,6 +70,7 @@ class RecommendationEmbedding
     public function setEmbedding(array $embedding): self
     {
         $this->embedding = $embedding;
+
         return $this;
     }
 
@@ -79,6 +82,8 @@ class RecommendationEmbedding
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 }
+

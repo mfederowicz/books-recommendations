@@ -94,7 +94,7 @@ final class SeedTagsCommand extends Command
             // Check if tag already exists
             $existingTag = $tagRepository->findOneBy(['name' => $tagData['name']]);
             if ($existingTag) {
-                $skipped++;
+                ++$skipped;
                 continue;
             }
 
@@ -104,7 +104,7 @@ final class SeedTagsCommand extends Command
             $tag->setActive(true);
 
             $this->entityManager->persist($tag);
-            $created++;
+            ++$created;
         }
 
         $this->entityManager->flush();
@@ -117,7 +117,7 @@ final class SeedTagsCommand extends Command
             $io->warning(sprintf('Skipped %d existing tags.', $skipped));
         }
 
-        if ($created === 0 && $skipped === 0) {
+        if (0 === $created && 0 === $skipped) {
             $io->info('No tags were processed.');
         }
 

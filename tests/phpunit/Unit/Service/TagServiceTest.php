@@ -32,7 +32,7 @@ final class TagServiceTest extends TestCase
         $query = 'fant';
         $expectedTags = [
             $this->createTag('fantasy'),
-            $this->createTag('fantastic')
+            $this->createTag('fantastic'),
         ];
 
         $this->tagRepository
@@ -99,6 +99,7 @@ final class TagServiceTest extends TestCase
         $tag->setName($name);
         $tag->setAscii(strtolower($name));
         $tag->setActive(true);
+
         return $tag;
     }
 }

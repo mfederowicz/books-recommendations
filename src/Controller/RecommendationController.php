@@ -14,11 +14,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class RecommendationController extends AbstractController
 {
     public function __construct(
-        private RecommendationServiceInterface $recommendationService
-    ) {}
+        private RecommendationServiceInterface $recommendationService,
+    ) {
+    }
 
     /**
-     * Handle recommendation form submission via HTMX
+     * Handle recommendation form submission via HTMX.
      */
     public function create(Request $request): Response
     {
@@ -28,13 +29,13 @@ final class RecommendationController extends AbstractController
         // Walidacja danych
         if (empty($description) || strlen($description) < 30 || strlen($description) > 500) {
             return $this->render('components/recommendation_error.html.twig', [
-                'error' => 'Description must be between 30 and 500 characters.'
+                'error' => 'Description must be between 30 and 500 characters.',
             ], new Response('', 400));
         }
 
         if (count($tagNames) < 2) {
             return $this->render('components/recommendation_error.html.twig', [
-                'error' => 'Please select at least 2 tags.'
+                'error' => 'Please select at least 2 tags.',
             ], new Response('', 400));
         }
 
@@ -50,7 +51,7 @@ final class RecommendationController extends AbstractController
 
             if (count($tags) < 2) {
                 return $this->render('components/recommendation_error.html.twig', [
-                    'error' => 'Some selected tags are invalid. Please try again.'
+                    'error' => 'Some selected tags are invalid. Please try again.',
                 ], new Response('', 400));
             }
 
@@ -58,30 +59,29 @@ final class RecommendationController extends AbstractController
             $recommendation = $this->recommendationService->createOrUpdateRecommendation(
                 $this->getUser()->getId(),
                 $description,
-                array_map(fn($tag) => $tag->getId(), $tags)
+                array_map(fn ($tag) => $tag->getId(), $tags)
             );
 
             // Zwróć sukces - HTMX może to obsłużyć
             return $this->render('components/recommendation_success.html.twig', [
-                'recommendation' => $recommendation
+                'recommendation' => $recommendation,
             ]);
-
         } catch (\Exception $e) {
             return $this->render('components/recommendation_error.html.twig', [
-                'error' => 'An error occurred while processing your recommendation. Please try again.'
+                'error' => 'An error occurred while processing your recommendation. Please try again.',
             ], new Response('', 500));
         }
     }
 
     /**
-     * Show user's recommendations (for HTMX loading)
+     * Show user's recommendations (for HTMX loading).
      */
     public function list(): Response
     {
         // TODO: Implement listing recommendations
         // For now return placeholder
         return $this->render('components/recommendations_list.html.twig', [
-            'recommendations' => []
+            'recommendations' => [],
         ]);
     }
 }

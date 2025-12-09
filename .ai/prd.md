@@ -55,13 +55,14 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 
 ### US-005: Wprowadzanie opisu książki
 - **Tytuł:** Dodawanie opisu książki w celu uzyskania rekomendacji
-- **Opis:** Użytkownik wprowadza opis książki w intuicyjnym formularzu, którego długość wynosi od 30 do 500 znaków.
+- **Opis:** Użytkownik wprowadza opis książki w intuicyjnym formularzu, którego długość wynosi od 30 do 500 znaków. System automatycznie generuje embeddingi używając OpenAI API.
 - **Kryteria akceptacji:**
   - **Status: ✅** Użytkownik po zalogowaniu (US-002) może wypełnić formularz dodania nowej rekomendacji.
   - **Status: ✅** Formularz nie przyjmuje opisu krótszego niż 30 znaków ani dłuższego niż 500 znaków.
   - **Status: ✅** Oprócz opisu użytkownik wybiera z listy tagów min 5-15 tagów (encja: tags, input do wprowadzania tagów pozwala na wyszukanie z listy tagów pobranych z bazy, oczywiście w tle nie ładujemy całej tabeli do pamięci, tylko pobieramy listę tagów w tle ale tylko takich które rozpoczynają się od pierwszych 2 znaków, pobieramy max 30 elementów).
-  - Do normalizacji należy użyć funkcji NormalizationTextHash która będzie dostępna jako service
-  - Po normalizacji opisu sprawdzamy czy taka rekomendacja już nie istnieje(encja recommendations_embeddings), jeżeli nie istnieje pobieranany jest zestaw danych z openai i zapisywany w bazie (encja recommendations_embeddings, oraz encja recommendations (user_id,short_description,normalized_text_hash,created_at,updated_at)), normalized_text_hash - jest hashem sha256 z orginalnego opisu wprowadzonego przez usera.
+  - **Status: ✅** Do normalizacji należy użyć funkcji NormalizationTextHash która będzie dostępna jako service
+  - **Status: ✅** Po normalizacji opisu sprawdzamy czy taka rekomendacja już nie istnieje(encja recommendations_embeddings), jeżeli nie istnieje pobieranany jest zestaw danych z OpenAI i zapisywany w bazie (encja recommendations_embeddings, oraz encja recommendations (user_id,short_description,normalized_text_hash,created_at,updated_at)), normalized_text_hash - jest hashem sha256 z orginalnego opisu wprowadzonego przez usera.
+  - **Status: ✅** Klient OpenAI do embeddingów używa zmiennych środowiskowych OPENAI_API_KEY i OPENAI_MODEL (domyślnie text-embedding-3-small)
   
 
 ### US-006: Wyświetlanie rekomendacji
@@ -83,9 +84,9 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Tytuł:** Aktualizacja danych rekomendacji w tle
 - **Opis:** System automatycznie pobiera nowe wektory książek w tle, umożliwiając aktualizację wyników rekomendacji przy kolejnych wizytach użytkownika.
 - **Kryteria akceptacji:**
-  - Proces aktualizacji odbywa się bez zakłócania pracy użytkownika.
-  - Nowe wektory wpływają na trafność rekomendacji przy następnych wyszukiwaniach.
-  - Proces aktualizacji realizowany jest przez komendy z poziomu konsoli, można je uruchomić ręcznie, lub w przyszłości z poziomu crona
+  - **Status: ✅** Proces aktualizacji odbywa się bez zakłócania pracy użytkownika.
+  - **Status: ✅** Nowe wektory wpływają na trafność rekomendacji przy następnych wyszukiwaniach.
+  - **Status: ✅** Proces aktualizacji realizowany jest przez komendy z poziomu konsoli: `app:process:ebook-embeddings [--batch-size=N] [--dry-run]`, można je uruchomić ręcznie, lub w przyszłości z poziomu crona
 
 ## 6. Metryki sukcesu
 - Co najmniej 90% użytkowników posiada wypełnione preferencje w swoich profilach.

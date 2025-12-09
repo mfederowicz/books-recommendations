@@ -146,3 +146,4 @@ final class TextNormalizationServiceTest extends TestCase
         $this->assertEquals($expectedHash, $hash);
     }
 }
+

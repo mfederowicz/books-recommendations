@@ -10,12 +10,13 @@ use App\Repository\TagRepository;
 final class TagService
 {
     public function __construct(
-        private TagRepository $tagRepository
-    ) {}
+        private TagRepository $tagRepository,
+    ) {
+    }
 
     /**
      * Find active tags starting with given prefix
-     * Returns maximum 30 results for autocomplete functionality
+     * Returns maximum 30 results for autocomplete functionality.
      *
      * @return Tag[]
      */
@@ -30,7 +31,7 @@ final class TagService
     }
 
     /**
-     * Find active tag by exact name match
+     * Find active tag by exact name match.
      */
     public function findActiveTagByName(string $name): ?Tag
     {
@@ -38,7 +39,7 @@ final class TagService
     }
 
     /**
-     * Get all active tags (for admin purposes)
+     * Get all active tags (for admin purposes).
      *
      * @return Tag[]
      */

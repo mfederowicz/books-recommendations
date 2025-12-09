@@ -18,7 +18,7 @@ final class LoginThrottlingService implements LoginThrottlingServiceInterface
         private EntityManagerInterface $entityManager,
         int $maxAttempts = 5,
         int $blockDurationMinutes = 15,
-        int $resetAttemptsAfterMinutes = 60
+        int $resetAttemptsAfterMinutes = 60,
     ) {
         $this->maxAttempts = $maxAttempts;
         $this->blockDurationMinutes = $blockDurationMinutes;
@@ -29,14 +29,14 @@ final class LoginThrottlingService implements LoginThrottlingServiceInterface
     {
         $failedLogin = $this->findFailedLoginByEmail($email);
 
-        return $failedLogin !== null && $failedLogin->isBlocked();
+        return null !== $failedLogin && $failedLogin->isBlocked();
     }
 
     public function recordFailedLoginAttempt(string $email, ?string $ipAddress = null): void
     {
         $failedLogin = $this->findFailedLoginByEmail($email);
 
-        if ($failedLogin === null) {
+        if (null === $failedLogin) {
             $failedLogin = new UserFailedLogin();
             $failedLogin->setEmail($email);
             $failedLogin->setIpAddress($ipAddress);
@@ -61,7 +61,7 @@ final class LoginThrottlingService implements LoginThrottlingServiceInterface
     {
         $failedLogin = $this->findFailedLoginByEmail($email);
 
-        if ($failedLogin !== null) {
+        if (null !== $failedLogin) {
             $this->entityManager->remove($failedLogin);
             $this->entityManager->flush();
         }

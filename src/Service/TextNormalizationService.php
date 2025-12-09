@@ -13,7 +13,7 @@ final class TextNormalizationService implements TextNormalizationServiceInterfac
      * - konwertuje na małe litery
      * - usuwa znaki specjalne, zostawiając tylko litery, cyfry i spacje
      * - zamienia wielokrotne spacje na pojedyncze
-     * - usuwa spacje z początku i końca
+     * - usuwa spacje z początku i końca.
      */
     public function normalizeText(string $text): string
     {
@@ -29,10 +29,11 @@ final class TextNormalizationService implements TextNormalizationServiceInterfac
     }
 
     /**
-     * Generuje hash SHA256 z znormalizowanego tekstu
+     * Generuje hash SHA256 z znormalizowanego tekstu.
      */
     public function generateHash(string $normalizedText): string
     {
         return hash('sha256', $normalizedText);
     }
 }
+
