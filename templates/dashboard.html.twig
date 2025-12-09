@@ -8,10 +8,20 @@
   <div class="sticky top-0 bg-white shadow-sm border-b z-10">
     <div class="max-w-4xl mx-auto p-6">
       <div class="bg-white rounded-lg shadow-sm border p-6">
+        <!-- Miejsce na komunikaty sukcesu/błędu -->
+        <div id="global-messages" class="mb-6"></div>
+
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Find your next book</h2>
         <p class="text-gray-600 mb-6">Describe the book you want to read (30-500 characters)</p>
 
-        <form method="post" class="space-y-4">
+        <form
+          hx-post="/recommendations"
+          hx-target="#global-messages"
+          hx-swap="innerHTML"
+          hx-on:htmx:after-request="handleFormResponse(event)"
+          class="space-y-4"
+          onsubmit="return false;"
+        >
           <div>
             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
               Book Description
@@ -49,10 +59,6 @@
                     name="q"
                     class="h-11 w-full px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 flex items-center"
                     placeholder="Type a tag and press Enter..."
-                    hx-get="/api/tags"
-                    hx-target="#tag-suggestions"
-                    hx-trigger="input changed delay:300ms"
-                    hx-include="[name='q']"
                   >
                   <div id="tag-loading" class="htmx-indicator absolute right-3 top-3">
                     <svg class="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
@@ -69,10 +75,11 @@
                 Reset
               </button>
               <button
-                type="submit"
+                type="button"
                 class="h-11 inline-flex items-center justify-center px-6 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 id="submit-btn"
                 disabled
+                onclick="submitForm()"
               >
                   <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white hidden" id="loading-spinner" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -135,37 +142,139 @@ function validateForm() {
   submitBtn.disabled = !(isValidDescription && isValidTags);
 }
 
+// Funkcja obsługi odpowiedzi HTMX
+function handleFormResponse(event) {
+  const xhr = event.detail.xhr;
+  const submitBtn = document.getElementById('submit-btn');
+  const loadingSpinner = document.getElementById('loading-spinner');
+
+  // Ukryj spinner ładowania
+  loadingSpinner.classList.add('hidden');
+  submitBtn.disabled = false;
+
+  if (xhr.status === 200) {
+    // Sukces - wyczyść formularz
+    clearForm();
+  }
+  // Błąd będzie wyświetlony w #global-messages przez HTMX
+}
+
+// Funkcja wysyłania formularza
+function submitForm() {
+  const form = document.querySelector('form');
+  const tagContainer = document.getElementById('tag-container');
+
+  // Usuń istniejące ukryte inputy tagów
+  form.querySelectorAll('input[name="tags[]"]').forEach(input => input.remove());
+
+  // Dodaj nowe ukryte inputy dla każdego tagu
+  Array.from(tagContainer.children).forEach(badge => {
+    const tagName = badge.querySelector('span').textContent;
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'tags[]';
+    hiddenInput.value = tagName;
+    form.appendChild(hiddenInput);
+  });
+
+  // Pokaż spinner ładowania
+  const submitBtn = document.getElementById('submit-btn');
+  const loadingSpinner = document.getElementById('loading-spinner');
+  submitBtn.disabled = true;
+  loadingSpinner.classList.remove('hidden');
+
+  // Wywołaj HTMX request
+  htmx.trigger(form, 'submit');
+}
+
+// Funkcja czyszczenia formularza po sukcesie
+function clearForm() {
+  // Wyczyść textarea
+  const descriptionTextarea = document.getElementById('description');
+  descriptionTextarea.value = '';
+
+  // Wyczyść input tagów
+  const tagInput = document.getElementById('tag-input');
+  tagInput.value = '';
+
+  // Wyczyść kontener tagów
+  const tagContainer = document.getElementById('tag-container');
+  tagContainer.innerHTML = '';
+
+  // Zresetuj licznik znaków
+  document.getElementById('char-count').textContent = '0';
+
+  // Zresetuj walidację
+  validateForm();
+
+  // Focus na textarea
+  descriptionTextarea.focus();
+}
+
 // Funkcjonalność tagów z autocomplete
-let currentTagInput = null;
+let tagSearchTimeout = null;
 
 document.getElementById('tag-input').addEventListener('input', function() {
-  currentTagInput = this;
+  const inputValue = this.value.trim();
   const suggestions = document.getElementById('tag-suggestions');
 
-  if (this.value.trim().length >= 2) {
-    suggestions.classList.remove('hidden');
+  // Wyczyść poprzedni timeout
+  if (tagSearchTimeout) {
+    clearTimeout(tagSearchTimeout);
+  }
+
+  if (inputValue.length >= 2) {
     // Ustaw szerokość dropdown na szerokość inputa
     suggestions.style.width = this.offsetWidth + 'px';
+
+    // Opóźnij request o 300ms
+    tagSearchTimeout = setTimeout(() => {
+      // Wykonaj HTMX request ręcznie
+      htmx.ajax('GET', '/api/tags?q=' + encodeURIComponent(inputValue), {
+        target: '#tag-suggestions',
+        swap: 'innerHTML'
+      });
+    }, 300);
   } else {
+    // Dla mniej niż 2 znaków ukryj sugestie
     suggestions.classList.add('hidden');
   }
 });
 
 // HTMX event listeners
+document.addEventListener('htmx:beforeRequest', function(evt) {
+  // Przed wysłaniem formularza rekomendacji, sprawdź czy to właściwy request
+  if (evt.detail.target.id === 'global-messages') {
+    // Logika dodawania tagów jest już w submitForm()
+    // Tutaj tylko pokazujemy loading
+    const submitBtn = document.getElementById('submit-btn');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    submitBtn.disabled = true;
+    loadingSpinner.classList.remove('hidden');
+  }
+});
+
 document.addEventListener('htmx:afterRequest', function(evt) {
   if (evt.detail.target.id === 'tag-suggestions') {
     const suggestions = document.getElementById('tag-suggestions');
-    // Sprawdź czy odpowiedź zawiera jakieś tagi (nie pusty div)
+    const tagInput = document.getElementById('tag-input');
+
+    // Sprawdź czy odpowiedź zawiera jakieś tagi
     const response = evt.detail.xhr.response || '';
-    const hasContent = response.trim() !== '' &&
-                      !response.includes('<div class="py-1">') ||
-                      response.includes('onclick="selectTagSuggestion');
+    const hasContent = response.includes('onclick="selectTagSuggestion');
 
     if (hasContent) {
       suggestions.classList.remove('hidden');
     } else {
       suggestions.classList.add('hidden');
     }
+
+    // Przywróć focus na input tagów jeśli to był request dla sugestii
+    setTimeout(() => {
+      if (document.activeElement !== tagInput && tagInput.value.trim().length >= 2) {
+        tagInput.focus();
+      }
+    }, 10);
   }
 });
 
@@ -179,6 +288,7 @@ document.getElementById('tag-input').addEventListener('keydown', function(e) {
       addTagBadge(tagValue);
       this.value = '';
       suggestions.classList.add('hidden');
+      this.focus(); // Ustaw focus z powrotem na input
     }
   } else if (e.key === 'Escape') {
     suggestions.classList.add('hidden');
@@ -196,13 +306,20 @@ document.addEventListener('click', function(e) {
 });
 
 // Funkcja wyboru sugestii tagu
-function selectTagSuggestion(tagName) {
+function selectTagSuggestion(tagName, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
   const tagInput = document.getElementById('tag-input');
   const suggestions = document.getElementById('tag-suggestions');
 
   addTagBadge(tagName);
   tagInput.value = '';
   suggestions.classList.add('hidden');
+
+  // Ustaw focus z powrotem na input
   tagInput.focus();
 }
 

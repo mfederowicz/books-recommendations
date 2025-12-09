@@ -2,7 +2,7 @@
   {% for tag in tags %}
   <div
     class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-    onclick="selectTagSuggestion('{{ tag.name }}')"
+    onclick="selectTagSuggestion('{{ tag.name }}', event)"
   >
     {{ tag.name }}
   </div>
