@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Books Recommender{% endblock %}</title>
 
-    <!-- Basecoat UI CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat@latest/dist/basecoat.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="{{ asset('build/app.css') }}">
@@ -24,9 +24,20 @@
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ path('app_register') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                        Register
-                    </a>
+                    {% if app.user %}
+                        <!-- Zalogowany użytkownik -->
+                        <span class="text-gray-700 px-3 py-2 text-sm">
+                            Welcome, {{ app.user.email }}
+                        </span>
+                        <a href="{{ path('app_logout') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            Logout
+                        </a>
+                    {% else %}
+                        <!-- Niezalogowany użytkownik -->
+                        <a href="{{ path('app_register') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            Register
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
