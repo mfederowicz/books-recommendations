@@ -40,12 +40,12 @@ Całość opiera się na standardowych mechanizmach Symfony 8.x, z rozszerzeniem
 ## 2. LOGIKA BACKENDOWA
 
 ### Struktura endpointów API i modeli danych:
-- **Endpointy (rozszerzenie routes.yaml):**: 
+- **Endpointy (rozszerzenie routes.yaml):**
   - POST `/register` (AuthController::register) – tworzy User, haszuje hasło, zapisuje do DB.
-  - POST `/login` (AuthController::login) – waliduje credentials, ustawia sesję.
+  - POST `/login` (AuthController::login) – waliduje credentials, ustawia sesję, obsługuje throttling.
   - POST `/logout` (z Symfony security) – czyści sesję.
   - Brak API dla resetu (US-003) – tylko konsola `security:reset-user-passwd`.
-- **Modele danych:** Rozszerzenie encji `Entity/User.php` (z pamięci: id, email UNIQUE, password_hash, last_login, created_at, updated_at). Nowa encja? Brak – użyj istniejącej User z Doctrine. Walidacja via @Assert (Symfony Validator): Email\Valid, Password\Length(min=8), UniqeEntity(email).
+- **Modele danych:** Rozszerzenie encji `Entity/User.php` (z pamięci: id, email UNIQUE, password_hash, last_login, created_at, updated_at). Dodano `Entity/UserFailedLogin.php` dla mechanizmu throttling. Walidacja via @Assert (Symfony Validator): Email\Valid, Password\Length(min=8), UniqeEntity(email).
 - Zgodność z istniejącym: Homepage (`/`) w `DefaultController::index` sprawdza `if ($this->getUser())` i renderuje conditional partials; nie modyfikuj istniejących tras.
 
 ### Mechanizm walidacji danych wejściowych:
@@ -66,16 +66,19 @@ Całość opiera się na standardowych mechanizmach Symfony 8.x, z rozszerzeniem
 - **Konfiguracja:** Rozszerz `config/packages/security.yaml`: firewalls z form_login (provider: entity, user_provider: App\Security\UserProvider), remember_me (secret, lifetime: 12h dla US-002), logout (path: /logout). Access_control: /login i /register anonymous, reszta authenticated.
 - **User entity:** Implementuje UserInterface, PasswordAuthenticatedUserInterface. Hashing via UserPasswordHasherInterface (auto-injected w controllery).
 - **Rejestracja (US-001):** W AuthController::register – create User, hasher-&gt;hashPassword(), entityManager-&gt;persist(), auto-logowanie via $this-&gt;getUserAuthenticator()-&gt;authenticateUser().
-- **Logowanie (US-002):** Symfony form_login obsługuje POST /login, walidacja via AuthenticationUtils. Po sukcesie: update last_login, redirect do / z sesją.
+- **Logowanie (US-002):** Symfony form_login obsługuje POST /login, walidacja via AuthenticationUtils. Po sukcesie: update last_login, redirect do / z sesją. **Throttling:** Maksymalnie 5 nieudanych prób, blokada na 15 minut, automatyczne czyszczenie po sukcesie.
 - **Wylogowanie (US-004):** Standardowy logout z security.yaml – invalidate sesję, clear cookies.
 - **Reset hasła (US-003):** Custom konsola `Command\ResetPasswordCommand` (extends AbstractCommand) – argumenty email/passwd, fetch User by email, hasher-&gt;hashPassword(), flush. Brak email resetu – tylko admin via CLI (zgodne z PRD).
-- **Serwisy i kontrakty:** 
+- **Serwisy i kontrakty:**
   - Serwis: `AuthService` (injected) dla wspólnej logiki (hashing, validation).
-  - Kontrakty: UserProvider (entity), PasswordHasherInterface, AuthenticationUtils.
-  - Bezpieczeństwo: CSRF protection w formach, rate-limiting via Symfony (opcjonalnie dla login), hashowanie BCrypt.
+  - Serwis: `LoginThrottlingService` (DDD via interface) dla mechanizmu throttling logowania.
+  - Kontrakty: UserProvider (entity), PasswordHasherInterface, AuthenticationUtils, LoginThrottlingServiceInterface.
+  - Bezpieczeństwo: CSRF protection w formach, rate-limiting via custom LoginThrottlingService, hashowanie BCrypt.
+  - Event Listeners: LoginFailureListener (rejestracja nieudanych prób), LoginSuccessListener (czyszczenie po sukcesie).
 
 ### Kluczowe wnioski:
-- Architektura jest modułowa: Frontend HTMX minimalizuje JS, backend Symfony obsługuje stan via sesje. 
+- Architektura jest modułowa: Frontend HTMX minimalizuje JS, backend Symfony obsługuje stan via sesje.
 Zgodność z PRD: Sesja 12h, reset tylko admin, conditional rendering bez naruszania istniejącej strony domowej.
-- Bezpieczeństwo: Standardowe Symfony (hashing, CSRF), brak custom RLS.
+- Bezpieczeństwo: Standardowe Symfony (hashing, CSRF), custom throttling service, event-driven logging.
+- Konfiguracja: Parametry throttling w `services.yaml` (max_attempts: 5, block_duration: 15min, reset_after: 60min).
 - Rozszerzalność: Łatwa integracja z rekomendacjami (US-005+) via security context w controllerach.
