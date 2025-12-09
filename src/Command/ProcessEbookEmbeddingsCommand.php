@@ -143,4 +143,3 @@ final class ProcessEbookEmbeddingsCommand extends Command
         $this->entityManager->flush();
     }
 }
-

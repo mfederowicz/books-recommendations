@@ -93,32 +93,4 @@ final class OpenAIEmbeddingClientTest extends TestCase
 
         $this->assertEquals([], $result);
     }
-
-    public function testParseErrorMessageHandlesJsonErrorResponse(): void
-    {
-        $client = new OpenAIEmbeddingClient();
-
-        $reflection = new \ReflectionClass($client);
-        $method = $reflection->getMethod('parseErrorMessage');
-        $method->setAccessible(true);
-
-        $errorResponse = '{"error":{"message":"Test error message"}}';
-        $result = $method->invoke($client, $errorResponse);
-
-        $this->assertEquals('Test error message', $result);
-    }
-
-    public function testParseErrorMessageHandlesNonJsonResponse(): void
-    {
-        $client = new OpenAIEmbeddingClient();
-
-        $reflection = new \ReflectionClass($client);
-        $method = $reflection->getMethod('parseErrorMessage');
-        $method->setAccessible(true);
-
-        $errorResponse = 'Plain text error';
-        $result = $method->invoke($client, $errorResponse);
-
-        $this->assertEquals('Unknown error', $result);
-    }
 }

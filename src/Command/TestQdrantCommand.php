@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class TestQdrantCommand extends Command
 {
     public function __construct(
-        private QdrantClientInterface $qdrantClient
+        private QdrantClientInterface $qdrantClient,
     ) {
         parent::__construct();
     }
@@ -77,9 +77,9 @@ final class TestQdrantCommand extends Command
             } else {
                 // Generate some test vectors (random for demo)
                 $testPoints = [];
-                for ($i = 1; $i <= 5; $i++) {
+                for ($i = 1; $i <= 5; ++$i) {
                     $vector = [];
-                    for ($j = 0; $j < $vectorSize; $j++) {
+                    for ($j = 0; $j < $vectorSize; ++$j) {
                         $vector[] = (float) (mt_rand(-1000, 1000) / 1000); // Random float between -1 and 1
                     }
 
@@ -89,7 +89,7 @@ final class TestQdrantCommand extends Command
                         'payload' => [
                             'title' => "Sample Ebook {$i}",
                             'author' => "Author {$i}",
-                            'tags' => ["fiction", "bestseller", "ebook_{$i}"],
+                            'tags' => ['fiction', 'bestseller', "ebook_{$i}"],
                             'ebook_id' => $i,
                             'isbn' => "978-0-123456-78-{$i}",
                             'created_at' => date('c'),
@@ -104,11 +104,11 @@ final class TestQdrantCommand extends Command
                 $io->success('Batch upsert completed successfully');
                 $io->table(
                     ['Point ID', 'Title', 'Author'],
-                    array_map(function($point) {
+                    array_map(function ($point) {
                         return [
                             $point['id'],
                             $point['payload']['title'],
-                            $point['payload']['author']
+                            $point['payload']['author'],
                         ];
                     }, $testPoints)
                 );
@@ -125,11 +125,11 @@ final class TestQdrantCommand extends Command
                 $io->success('Search completed successfully');
                 $io->table(
                     ['ID', 'Score', 'Title'],
-                    array_map(function($result) {
+                    array_map(function ($result) {
                         return [
                             $result['id'],
                             number_format($result['score'], 4),
-                            $result['payload']['title'] ?? 'N/A'
+                            $result['payload']['title'] ?? 'N/A',
                         ];
                     }, $searchResults)
                 );
@@ -149,9 +149,9 @@ final class TestQdrantCommand extends Command
             }
 
             $io->success('All Qdrant tests completed successfully!');
-
         } catch (\Exception $e) {
-            $io->error('Qdrant test failed: ' . $e->getMessage());
+            $io->error('Qdrant test failed: '.$e->getMessage());
+
             return Command::FAILURE;
         }
 
@@ -210,7 +210,7 @@ final class TestQdrantCommand extends Command
         foreach ($ebooks as $ebook) {
             // Generate realistic-ish vector (in real scenario this would come from OpenAI)
             $vector = [];
-            for ($j = 0; $j < $vectorSize; $j++) {
+            for ($j = 0; $j < $vectorSize; ++$j) {
                 $vector[] = (float) (mt_rand(-1000, 1000) / 1000);
             }
 

@@ -31,4 +31,3 @@ interface OpenAIEmbeddingClientInterface
      */
     public function getEmbeddingsBatch(array $texts): array;
 }
-

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Service;
 
+use App\DTO\EbookEmbeddingServiceInterface;
 use App\DTO\OpenAIEmbeddingClientInterface;
 use App\DTO\TextNormalizationServiceInterface;
 use App\Entity\Recommendation;
@@ -20,6 +21,7 @@ final class RecommendationServiceTest extends TestCase
     private EntityManagerInterface $entityManager;
     private TagRepository $tagRepository;
     private OpenAIEmbeddingClientInterface $openAIEmbeddingClient;
+    private EbookEmbeddingServiceInterface $ebookEmbeddingService;
     private RecommendationService $recommendationService;
 
     protected function setUp(): void
@@ -28,6 +30,7 @@ final class RecommendationServiceTest extends TestCase
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->tagRepository = $this->createMock(TagRepository::class);
         $this->openAIEmbeddingClient = $this->createMock(OpenAIEmbeddingClientInterface::class);
+        $this->ebookEmbeddingService = $this->createMock(EbookEmbeddingServiceInterface::class);
 
         // Configure entityManager to return appropriate repositories
         $recommendationRepository = $this->createMock(EntityRepository::class);
@@ -50,7 +53,8 @@ final class RecommendationServiceTest extends TestCase
             $this->textNormalizationService,
             $this->entityManager,
             $this->tagRepository,
-            $this->openAIEmbeddingClient
+            $this->openAIEmbeddingClient,
+            $this->ebookEmbeddingService
         );
     }
 

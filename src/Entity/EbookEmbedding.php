@@ -117,4 +117,3 @@ class EbookEmbedding
         return $this;
     }
 }
-

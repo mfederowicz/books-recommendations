@@ -39,8 +39,8 @@ interface RecommendationServiceInterface
      * Znajdź podobne książki na podstawie tekstu rekomendacji za pomocą wyszukiwania wektorowego w Qdrant.
      * Używa embeddingu użytkownika do wyszukania podobnych książek w kolekcji ebooków.
      *
-     * @param string $text   Tekst rekomendacji użytkownika do wyszukania podobnych książek
-     * @param int    $limit  Maksymalna liczba wyników
+     * @param string $text  Tekst rekomendacji użytkownika do wyszukania podobnych książek
+     * @param int    $limit Maksymalna liczba wyników
      *
      * @return array Lista podobnych książek z wynikami podobieństwa
      */

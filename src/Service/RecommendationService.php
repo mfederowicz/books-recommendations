@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\DTO\EbookEmbeddingServiceInterface;
 use App\DTO\OpenAIEmbeddingClientInterface;
-use App\DTO\QdrantClientInterface;
 use App\DTO\RecommendationServiceInterface;
 use App\DTO\TextNormalizationServiceInterface;
 use App\Entity\Recommendation;
@@ -21,7 +21,7 @@ final class RecommendationService implements RecommendationServiceInterface
         private EntityManagerInterface $entityManager,
         private TagRepository $tagRepository,
         private OpenAIEmbeddingClientInterface $openAIEmbeddingClient,
-        private EbookEmbeddingService $ebookEmbeddingService,
+        private EbookEmbeddingServiceInterface $ebookEmbeddingService,
     ) {
     }
 
@@ -69,9 +69,8 @@ final class RecommendationService implements RecommendationServiceInterface
     /**
      * Znajdź podobne rekomendacje na podstawie tekstu za pomocą wyszukiwania wektorowego w Qdrant.
      *
-     * @param string $text Tekst do wyszukania podobnych rekomendacji
-     * @param int $limit Maksymalna liczba wyników
-     * @param int|null $userId ID użytkownika (opcjonalne filtrowanie)
+     * @param string $text  Tekst do wyszukania podobnych rekomendacji
+     * @param int    $limit Maksymalna liczba wyników
      *
      * @return array Lista podobnych rekomendacji z wynikami podobieństwa
      */
@@ -79,8 +78,8 @@ final class RecommendationService implements RecommendationServiceInterface
      * Znajdź podobne książki na podstawie tekstu rekomendacji za pomocą wyszukiwania wektorowego w Qdrant.
      * Używa embeddingu użytkownika do wyszukania podobnych książek w kolekcji ebooków.
      *
-     * @param string $text   Tekst rekomendacji użytkownika do wyszukania podobnych książek
-     * @param int    $limit  Maksymalna liczba wyników
+     * @param string $text  Tekst rekomendacji użytkownika do wyszukania podobnych książek
+     * @param int    $limit Maksymalna liczba wyników
      *
      * @return array Lista podobnych książek z wynikami podobieństwa
      */
@@ -157,5 +156,4 @@ final class RecommendationService implements RecommendationServiceInterface
         $this->entityManager->persist($recommendationEmbedding);
         $this->entityManager->flush();
     }
-
 }

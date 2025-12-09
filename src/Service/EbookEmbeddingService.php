@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\DTO\EbookEmbeddingServiceInterface;
 use App\DTO\QdrantClientInterface;
 use App\Entity\Ebook;
 use App\Entity\EbookEmbedding;
@@ -13,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
  * Service for managing ebook embeddings in Qdrant vector database.
  * Handles synchronization between MySQL storage and Qdrant for fast vector search.
  */
-final class EbookEmbeddingService
+class EbookEmbeddingService implements EbookEmbeddingServiceInterface
 {
     private const QDRANT_COLLECTION = 'ebooks';
     private const VECTOR_SIZE = 1536; // text-embedding-3-small dimension
@@ -64,8 +65,8 @@ final class EbookEmbeddingService
      * Find similar ebooks using vector search in Qdrant.
      *
      * @param array $queryVector The embedding vector to search for similar ebooks
-     * @param int $limit Maximum number of results
-     * @param array $filter Optional filters for the search
+     * @param int   $limit       Maximum number of results
+     * @param array $filter      Optional filters for the search
      *
      * @return array List of similar ebooks with similarity scores
      */
@@ -133,14 +134,14 @@ final class EbookEmbeddingService
             try {
                 $success = $this->syncEbookEmbeddingToQdrant($ebookEmbedding);
                 if ($success) {
-                    $syncedCount++;
+                    ++$syncedCount;
                 } else {
-                    $errorCount++;
+                    ++$errorCount;
                 }
             } catch (\Exception $e) {
-                $errorCount++;
+                ++$errorCount;
                 // Log error but continue with other embeddings
-                error_log("Failed to sync ebook embedding {$ebookEmbedding->getEbook()->getId()}: " . $e->getMessage());
+                error_log("Failed to sync ebook embedding {$ebookEmbedding->getEbook()->getId()}: ".$e->getMessage());
             }
         }
 

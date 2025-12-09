@@ -38,4 +38,5 @@ services:
 
     App\Service\QdrantClient: ~
 
-    App\Service\EbookEmbeddingService: ~
+    App\Service\EbookEmbeddingService:
+        autowire: true

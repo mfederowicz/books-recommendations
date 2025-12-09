@@ -36,4 +36,3 @@ final class TextNormalizationService implements TextNormalizationServiceInterfac
         return hash('sha256', $normalizedText);
     }
 }
-

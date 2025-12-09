@@ -48,4 +48,3 @@ interface LoginThrottlingServiceInterface
      */
     public function getFailedAttemptsCount(string $email): int;
 }
-

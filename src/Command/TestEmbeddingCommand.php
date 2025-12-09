@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class TestEmbeddingCommand extends Command
 {
     public function __construct(
-        private OpenAIEmbeddingClientInterface $openAIEmbeddingClient
+        private OpenAIEmbeddingClientInterface $openAIEmbeddingClient,
     ) {
         parent::__construct();
     }
@@ -42,7 +42,7 @@ final class TestEmbeddingCommand extends Command
         try {
             if ($batchMode) {
                 // Test batch processing
-                $texts = [$text, $text . ' (variant 1)', $text . ' (variant 2)'];
+                $texts = [$text, $text.' (variant 1)', $text.' (variant 2)'];
                 $io->info('Testing batch processing with 3 texts...');
 
                 $embeddings = $this->openAIEmbeddingClient->getEmbeddingsBatch($texts);
@@ -50,11 +50,10 @@ final class TestEmbeddingCommand extends Command
                 $io->success('Batch embedding generated successfully!');
                 $io->table(
                     ['Text', 'Embedding Length'],
-                    array_map(function($text, $embedding) {
+                    array_map(function ($text, $embedding) {
                         return [$text, count($embedding)];
                     }, $texts, $embeddings)
                 );
-
             } else {
                 // Test single embedding
                 $io->info('Testing single embedding generation...');
@@ -63,13 +62,13 @@ final class TestEmbeddingCommand extends Command
                 $embedding = $this->openAIEmbeddingClient->getEmbedding($text);
 
                 $io->success('Embedding generated successfully!');
-                $io->text("Embedding dimensions: " . count($embedding));
-                $io->text("First 5 values: " . implode(', ', array_slice($embedding, 0, 5)));
-                $io->text("Last 5 values: " . implode(', ', array_slice($embedding, -5)));
+                $io->text('Embedding dimensions: '.count($embedding));
+                $io->text('First 5 values: '.implode(', ', array_slice($embedding, 0, 5)));
+                $io->text('Last 5 values: '.implode(', ', array_slice($embedding, -5)));
             }
-
         } catch (\Exception $e) {
-            $io->error('Embedding generation failed: ' . $e->getMessage());
+            $io->error('Embedding generation failed: '.$e->getMessage());
+
             return Command::FAILURE;
         }
 

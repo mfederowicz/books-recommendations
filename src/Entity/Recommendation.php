@@ -154,4 +154,3 @@ class Recommendation
         return $this;
     }
 }
-

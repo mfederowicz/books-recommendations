@@ -19,7 +19,7 @@ final class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
     {
         $apiKey = $this->getEnvVar('OPENAI_API_KEY');
         $this->model = $this->getEnvVar('OPENAI_MODEL', 'text-embedding-3-small');
-        $this->client = OpenAI::client($apiKey);
+        $this->client = \OpenAI::client($apiKey);
     }
 
     /**
@@ -74,8 +74,7 @@ final class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
 
             return $embeddings;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to generate embeddings: ' . $e->getMessage(), 0, $e);
+            throw new \RuntimeException('Failed to generate embeddings: '.$e->getMessage(), 0, $e);
         }
     }
-
 }

@@ -54,7 +54,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $response->isSuccess();
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to create collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to create collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 
@@ -71,7 +71,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $response->isSuccess();
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to upsert point '{$id}' in collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to upsert point '{$id}' in collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 
@@ -89,7 +89,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $response->isSuccess();
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to upsert points in collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to upsert points in collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 
@@ -123,7 +123,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $results;
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to search in collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to search in collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 
@@ -136,7 +136,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $response->isSuccess();
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to delete point '{$id}' from collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to delete point '{$id}' from collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 
@@ -149,7 +149,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $response->isSuccess();
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to delete points from collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to delete points from collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 
@@ -175,7 +175,7 @@ final class QdrantClient implements QdrantClientInterface
 
             return $response->isSuccess();
         } catch (\Exception $e) {
-            throw new \RuntimeException("Failed to delete collection '{$collectionName}': " . $e->getMessage(), 0, $e);
+            throw new \RuntimeException("Failed to delete collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
     }
 }

@@ -28,4 +28,3 @@ interface TextNormalizationServiceInterface
      */
     public function generateHash(string $normalizedText): string;
 }
-

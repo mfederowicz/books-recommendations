@@ -86,4 +86,3 @@ class RecommendationEmbedding
         return $this;
     }
 }
-

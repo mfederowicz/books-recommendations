@@ -49,6 +49,7 @@ final class MigrateEbookEmbeddingsToQdrantCommand extends Command
 
             if (null === $stats) {
                 $io->warning('Qdrant collection does not exist or is not accessible');
+
                 return Command::FAILURE;
             }
 
@@ -71,6 +72,7 @@ final class MigrateEbookEmbeddingsToQdrantCommand extends Command
 
             if ($dryRun) {
                 $io->info('This would migrate all ebook embeddings to Qdrant...');
+
                 return Command::SUCCESS;
             }
 
@@ -102,9 +104,9 @@ final class MigrateEbookEmbeddingsToQdrantCommand extends Command
                     ]
                 );
             }
-
         } catch (\Exception $e) {
-            $io->error('Migration failed: ' . $e->getMessage());
+            $io->error('Migration failed: '.$e->getMessage());
+
             return Command::FAILURE;
         }
 
