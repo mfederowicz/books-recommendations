@@ -15,6 +15,12 @@ final class DefaultController extends AbstractController
      */
     public function index(): Response
     {
+        if ($this->getUser()) {
+            // Zalogowany użytkownik - pokaż dashboard
+            return $this->render('dashboard.html.twig');
+        }
+
+        // Niezalogowany - pokaż landing page
         return $this->render('homepage.html.twig');
     }
 

@@ -18,13 +18,14 @@ CREATE TABLE users (
 ```sql
 CREATE TABLE users_failed_logins (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NULL,
-  ip_address VARCHAR(45) NOT NULL,
-  attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  login_type ENUM('user', 'admin') NOT NULL DEFAULT 'user',
-  INDEX idx_user_id (user_id),
-  INDEX idx_ip_attempted (ip_address, attempted_at),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+  email VARCHAR(255) NOT NULL,
+  attempts_count INT NOT NULL DEFAULT 1,
+  last_attempt_at DATETIME NOT NULL,
+  blocked_until DATETIME NULL,
+  ip_address VARCHAR(45) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX email_idx (email),
+  INDEX blocked_until_idx (blocked_until)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 ```
 
@@ -120,7 +121,7 @@ CREATE TABLE recommendations_tags (
 
 2. Relacje między tabelami
 
-- `users` - `users_failed_logins`: Relacja jeden-do-wielu (jeden użytkownik może mieć wiele nieudanych prób logowania)
+- `users` - `users_failed_logins`: Relacja jeden-do-wielu oparta na emailu (jeden użytkownik może mieć wiele nieudanych prób logowania)
 - `users` - `users_success_logins`: Relacja jeden-do-wielu (jeden użytkownik może mieć wiele udanych prób logowania)
 - `users` - `recommendations`: Relacja jeden-do-wielu (jeden użytkownik może mieć wiele rekomendacji)
 - `recommendations` - `recommendations_embeddings`: Relacja jeden-do-jednego oparta na `normalized_text_hash` (każda rekomendacja ma dokładnie jeden embedding)
@@ -131,8 +132,8 @@ CREATE TABLE recommendations_tags (
 
 - `users.email` - unikalny indeks dla szybkiego wyszukiwania i logowania
 - `users.updated_at` - indeks dla ewentualnych zapytań o ostatnio aktywnych użytkownikach
-- `users_failed_logins.user_id` - indeks dla filtrowania prób logowania po użytkowniku
-- `users_failed_logins.ip_address, attempted_at` - złożony indeks dla mechanizmu throttling
+- `users_failed_logins.email` - indeks dla filtrowania prób logowania po emailu
+- `users_failed_logins.blocked_until` - indeks dla sprawdzania czy użytkownik jest zablokowany
 - `users_success_logins.user_id` - indeks dla filtrowania udanych prób logowania po użytkowniku
 - `users_success_logins.created_at` - indeks dla wyszukiwania logowań w czasie
 - `recommendations.user_id, created_at` - złożony indeks dla listowania rekomendacji użytkownika posortowanych po dacie
@@ -181,8 +182,12 @@ END //
 -- Procedura rejestrująca nieudaną próbę logowania
 CREATE PROCEDURE log_failed_login(IN p_user_id INT, IN p_ip VARCHAR(45), IN p_type ENUM('user','admin'))
 BEGIN
-    INSERT INTO users_failed_logins (user_id, ip_address, login_type)
-    VALUES (p_user_id, p_ip, p_type);
+    INSERT INTO users_failed_logins (email, attempts_count, last_attempt_at, ip_address)
+    VALUES (p_email, 1, NOW(), p_ip)
+    ON DUPLICATE KEY UPDATE
+        attempts_count = attempts_count + 1,
+        last_attempt_at = NOW(),
+        ip_address = p_ip;
 END //
 
 -- Procedura rejestrująca udaną próbę logowania
@@ -193,12 +198,12 @@ BEGIN
 END //
 
 -- Procedura sprawdzająca czy użytkownik powinien być zablokowany (throttling)
-CREATE PROCEDURE check_login_throttling(IN p_ip VARCHAR(45), IN p_minutes INT)
+CREATE PROCEDURE check_login_throttling(IN p_email VARCHAR(255))
 BEGIN
-    SELECT COUNT(*) as failed_attempts
+    SELECT attempts_count, blocked_until
     FROM users_failed_logins
-    WHERE ip_address = p_ip
-    AND attempted_at > DATE_SUB(NOW(), INTERVAL p_minutes MINUTE);
+    WHERE email = p_email
+    AND (blocked_until IS NULL OR blocked_until > NOW());
 END //
 
 DELIMITER ;
