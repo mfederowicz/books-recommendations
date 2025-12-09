@@ -68,7 +68,7 @@ Całość opiera się na standardowych mechanizmach Symfony 8.x, z rozszerzeniem
 - **Rejestracja (US-001):** W AuthController::register – create User, hasher-&gt;hashPassword(), entityManager-&gt;persist(), auto-logowanie via $this-&gt;getUserAuthenticator()-&gt;authenticateUser().
 - **Logowanie (US-002):** Symfony form_login obsługuje POST /login, walidacja via AuthenticationUtils. Po sukcesie: update last_login, redirect do / z sesją. **Throttling:** Maksymalnie 5 nieudanych prób, blokada na 15 minut, automatyczne czyszczenie po sukcesie.
 - **Wylogowanie (US-004):** Standardowy logout z security.yaml – invalidate sesję, clear cookies.
-- **Reset hasła (US-003):** Custom konsola `Command\ResetPasswordCommand` (extends AbstractCommand) – argumenty email/passwd, fetch User by email, hasher-&gt;hashPassword(), flush. Brak email resetu – tylko admin via CLI (zgodne z PRD).
+- **Reset hasła (US-003):** Custom konsola `Command\ResetUserPasswordCommand` (extends AbstractCommand) – argumenty email/passwd, fetch User by email, hasher-&gt;hashPassword(), flush. Brak email resetu – tylko admin via CLI (zgodne z PRD).
 - **Serwisy i kontrakty:**
   - Serwis: `AuthService` (injected) dla wspólnej logiki (hashing, validation).
   - Serwis: `LoginThrottlingService` (DDD via interface) dla mechanizmu throttling logowania.

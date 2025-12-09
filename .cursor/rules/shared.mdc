@@ -57,3 +57,24 @@ When modifying the directory structure, always update this section.
 11. Test results should not have Deprecations
 
 12. Always declare nullable variables at the end of methods parameters list
+
+## Command execution
+
+### Docker environment commands
+
+1. **Always use Docker wrapper for Symfony commands** - Since this application runs in Docker, all Symfony console commands must be executed using the `./bin/run.sh` wrapper script.
+
+   Examples:
+   - Use: `./bin/run.sh ./bin/console doctrine:migrations:migrate`
+   - Instead of: `./bin/console doctrine:migrations:migrate`
+   
+   - Use: `./bin/run.sh ./bin/phpunit`
+   - Instead of: `./bin/phpunit`
+
+2. **Always use Docker wrapper for PHP commands** - PHP scripts and tools should also use the Docker wrapper.
+
+   Examples:
+   - Use: `./bin/run.sh php create_test_user.php`
+   - Instead of: `php create_test_user.php`
+
+3. **Exception for development tools** - Local development tools like editors, git, or file operations don't need the wrapper.
