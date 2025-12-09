@@ -43,8 +43,8 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 - **Tytuł:** Resetowanie hasła do konta
 - **Opis:** Reset hasła do konta możliwe jest tylko przez administratora.
 - **Kryteria akceptacji:**
-    - Reset hasła realizowany jest przez komendę: security:reset-user-passwd email passwd.
-    - Po resecie hasła możliwe jest zalogowanie bez potrzeby korzystania ze skrzynki email.
+    - **Status: ✓** - Reset hasła realizowany jest przez komendę: security:reset-user-passwd email passwd.
+    - **Status: ✓** - Po resecie hasła możliwe jest zalogowanie bez potrzeby korzystania ze skrzynki email.
 
 ### US-004: Wylogowanie
 - **Tytuł:** Wylogowanie z konta
