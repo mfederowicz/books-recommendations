@@ -30,60 +30,60 @@ final class SeedTagsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $io->title('Seeding Tags Table');
+        $io->title('Wypełnianie tabeli tagów');
 
         $tags = [
-            // Genres
-            ['name' => 'Fantasy', 'ascii' => 'fantasy'],
+            // Gatunki literackie
+            ['name' => 'Fantastyka', 'ascii' => 'fantastyka'],
             ['name' => 'Science Fiction', 'ascii' => 'science-fiction'],
-            ['name' => 'Romance', 'ascii' => 'romance'],
-            ['name' => 'Mystery', 'ascii' => 'mystery'],
+            ['name' => 'Romans', 'ascii' => 'romans'],
+            ['name' => 'Kryminał', 'ascii' => 'kryminal'],
             ['name' => 'Thriller', 'ascii' => 'thriller'],
             ['name' => 'Horror', 'ascii' => 'horror'],
-            ['name' => 'Historical Fiction', 'ascii' => 'historical-fiction'],
-            ['name' => 'Biography', 'ascii' => 'biography'],
-            ['name' => 'Memoir', 'ascii' => 'memoir'],
-            ['name' => 'Self-Help', 'ascii' => 'self-help'],
-            ['name' => 'Business', 'ascii' => 'business'],
-            ['name' => 'Psychology', 'ascii' => 'psychology'],
-            ['name' => 'Philosophy', 'ascii' => 'philosophy'],
-            ['name' => 'History', 'ascii' => 'history'],
-            ['name' => 'Travel', 'ascii' => 'travel'],
-            ['name' => 'Cooking', 'ascii' => 'cooking'],
-            ['name' => 'Art', 'ascii' => 'art'],
-            ['name' => 'Music', 'ascii' => 'music'],
-            ['name' => 'Poetry', 'ascii' => 'poetry'],
-            ['name' => 'Drama', 'ascii' => 'drama'],
-            ['name' => 'Comedy', 'ascii' => 'comedy'],
-            ['name' => 'Adventure', 'ascii' => 'adventure'],
-            ['name' => 'Crime', 'ascii' => 'crime'],
+            ['name' => 'Powieść historyczna', 'ascii' => 'powiesc-historyczna'],
+            ['name' => 'Biografia', 'ascii' => 'biografia'],
+            ['name' => 'Pamiętnik', 'ascii' => 'pamietnik'],
+            ['name' => 'Rozwój osobisty', 'ascii' => 'rozwoj-osobisty'],
+            ['name' => 'Biznes', 'ascii' => 'biznes'],
+            ['name' => 'Psychologia', 'ascii' => 'psychologia'],
+            ['name' => 'Filozofia', 'ascii' => 'filozofia'],
+            ['name' => 'Historia', 'ascii' => 'historia'],
+            ['name' => 'Podróże', 'ascii' => 'podroze'],
+            ['name' => 'Gotowanie', 'ascii' => 'gotowanie'],
+            ['name' => 'Sztuka', 'ascii' => 'sztuka'],
+            ['name' => 'Muzyka', 'ascii' => 'muzyka'],
+            ['name' => 'Poezja', 'ascii' => 'poezja'],
+            ['name' => 'Dramat', 'ascii' => 'dramat'],
+            ['name' => 'Komedia', 'ascii' => 'komedia'],
+            ['name' => 'Przygoda', 'ascii' => 'przygoda'],
+            ['name' => 'Kryminalna', 'ascii' => 'kryminalna'],
             ['name' => 'Western', 'ascii' => 'western'],
-            ['name' => 'Young Adult', 'ascii' => 'young-adult'],
-            ['name' => 'Children', 'ascii' => 'children'],
-            ['name' => 'Literary Fiction', 'ascii' => 'literary-fiction'],
-            ['name' => 'Classic', 'ascii' => 'classic'],
-            ['name' => 'Contemporary', 'ascii' => 'contemporary'],
-            ['name' => 'Dystopian', 'ascii' => 'dystopian'],
-            ['name' => 'Magical Realism', 'ascii' => 'magical-realism'],
-            ['name' => 'Graphic Novel', 'ascii' => 'graphic-novel'],
-            ['name' => 'Short Stories', 'ascii' => 'short-stories'],
-            ['name' => 'Essay', 'ascii' => 'essay'],
-            ['name' => 'True Crime', 'ascii' => 'true-crime'],
-            ['name' => 'Health', 'ascii' => 'health'],
+            ['name' => 'Dla młodzieży', 'ascii' => 'dla-mlodziezy'],
+            ['name' => 'Dla dzieci', 'ascii' => 'dla-dzieci'],
+            ['name' => 'Literacka', 'ascii' => 'literacka'],
+            ['name' => 'Klasyka', 'ascii' => 'klasyka'],
+            ['name' => 'Współczesna', 'ascii' => 'wspolczesna'],
+            ['name' => 'Dystopia', 'ascii' => 'dystopia'],
+            ['name' => 'Realizm magiczny', 'ascii' => 'realizm-magiczny'],
+            ['name' => 'Komiks', 'ascii' => 'komiks'],
+            ['name' => 'Opowiadania', 'ascii' => 'opowiadania'],
+            ['name' => 'Esej', 'ascii' => 'esej'],
+            ['name' => 'Prawdziwa zbrodnia', 'ascii' => 'prawdziwa-zbrodnia'],
+            ['name' => 'Zdrowie', 'ascii' => 'zdrowie'],
             ['name' => 'Fitness', 'ascii' => 'fitness'],
-            ['name' => 'Spirituality', 'ascii' => 'spirituality'],
-            ['name' => 'Politics', 'ascii' => 'politics'],
-            ['name' => 'Science', 'ascii' => 'science'],
-            ['name' => 'Technology', 'ascii' => 'technology'],
-            ['name' => 'Nature', 'ascii' => 'nature'],
-            ['name' => 'Environment', 'ascii' => 'environment'],
-            ['name' => 'Sports', 'ascii' => 'sports'],
+            ['name' => 'Duchowość', 'ascii' => 'duchowosc'],
+            ['name' => 'Polityka', 'ascii' => 'polityka'],
+            ['name' => 'Nauka', 'ascii' => 'nauka'],
+            ['name' => 'Technologia', 'ascii' => 'technologia'],
+            ['name' => 'Przyroda', 'ascii' => 'przyroda'],
+            ['name' => 'Środowisko', 'ascii' => 'srodowisko'],
+            ['name' => 'Sport', 'ascii' => 'sport'],
             ['name' => 'Humor', 'ascii' => 'humor'],
-            ['name' => 'Reference', 'ascii' => 'reference'],
-            ['name' => 'Education', 'ascii' => 'education'],
-            ['name' => 'Language', 'ascii' => 'language'],
-            ['name' => 'Religion', 'ascii' => 'religion'],
-            ['name' => 'Mythology', 'ascii' => 'mythology'],
+            ['name' => 'Poradnik', 'ascii' => 'poradnik'],
+            ['name' => 'Edukacja', 'ascii' => 'edukacja'],
+            ['name' => 'Język', 'ascii' => 'jezyk'],
+            ['name' => 'Religia', 'ascii' => 'religia'],
+            ['name' => 'Mitologia', 'ascii' => 'mitologia'],
         ];
 
         $tagRepository = $this->entityManager->getRepository(Tag::class);
@@ -110,15 +110,15 @@ final class SeedTagsCommand extends Command
         $this->entityManager->flush();
 
         if ($created > 0) {
-            $io->success(sprintf('Successfully created %d new tags.', $created));
+            $io->success(sprintf('Pomyślnie utworzono %d nowych tagów.', $created));
         }
 
         if ($skipped > 0) {
-            $io->warning(sprintf('Skipped %d existing tags.', $skipped));
+            $io->warning(sprintf('Pominięto %d istniejących tagów.', $skipped));
         }
 
         if (0 === $created && 0 === $skipped) {
-            $io->info('No tags were processed.');
+            $io->info('Żadne tagi nie zostały przetworzone.');
         }
 
         return Command::SUCCESS;
