@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\DTO\QdrantClientInterface;
 use Qdrant\Config;
-use Qdrant\Http\Transport\RestClient;
+use Qdrant\Http\Builder;
 use Qdrant\Qdrant;
 
 /**
@@ -24,7 +24,8 @@ final class QdrantClient implements QdrantClientInterface
         $this->port = (int) $this->getEnvVar('QDRANT_PORT', '6333');
 
         $config = new Config($this->host, $this->port);
-        $transport = new RestClient($config);
+        $builder = new Builder();
+        $transport = $builder->build($config);
         $this->client = new Qdrant($transport);
     }
 
