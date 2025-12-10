@@ -26,6 +26,7 @@ jobs:
       - name: Configure test environment
         run: |
           echo "ENABLE_PCOV=1" >> .env
+          echo "APP_DEBUG=0" >> .env
 
       - name: Install PHP dependencies
         run: composer install --no-scripts
