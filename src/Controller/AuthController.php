@@ -82,7 +82,7 @@ final class AuthController extends AbstractController
         if ($lastUsername && $this->loginThrottlingService->isUserBlocked($lastUsername)) {
             $blockedUntil = $this->loginThrottlingService->getBlockedUntil($lastUsername);
             $throttlingError = $this->translator->trans('auth.throttling.blocked', [
-                '%time%' => $blockedUntil ? $blockedUntil->format('H:i:s') : 'pewnym czasie'
+                '%time%' => $blockedUntil ? $blockedUntil->format('H:i:s') : 'pewnym czasie',
             ]);
         }
 
