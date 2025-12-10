@@ -17,6 +17,12 @@ jobs:
           extensions: ctype, iconv, mbstring, intl
           tools: composer:v2
 
+      - name: Create .env file for tests
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.dist .env
+          fi
+
       - name: Install PHP dependencies
         run: make install
 
