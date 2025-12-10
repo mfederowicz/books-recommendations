@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mfederowicz/books-recommender/workflows/Test/badge.svg)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ATest)
 [![Lint](https://github.com/mfederowicz/books-recommender/workflows/Lint/badge.svg)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ALint)
-[![Test Coverage](https://img.shields.io/badge/coverage-53%25-yellow)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ATest)
+[![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/mfederowicz/books-recommender/actions)
 
 Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystująca embeddings OpenAI do dopasowania preferencji użytkowników.
 
@@ -49,34 +49,20 @@ QDRANT_PORT=6333
 DATABASE_URL=mysql://użytkownik:hasło@host:port/baza_danych
 ```
 
-### Instalacja i uruchomienie:
-
-#### Środowisko deweloperskie (Docker):
+### Instalacja:
 
 ```bash
-# Sklonuj repozytorium
-git clone https://github.com/mfederowicz/books-recommender.git
-cd books-recommender
+# Zainstaluj zależności
+composer install
 
-# Skonfiguruj środowisko
-cp .env.dist .env
-# Edytuj .env i dodaj swoje klucze API
-
-# Uruchom środowisko Docker
-docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d
-
-# Zainstaluj zależności PHP
-./bin/run.sh composer install
-
-# Przygotuj bazę danych
+# Uruchom z Docker
 ./bin/run.sh ./bin/console doctrine:migrations:migrate
 ./bin/run.sh ./bin/console doctrine:fixtures:load
 ./bin/run.sh ./bin/console app:seed:tags
 
-# Uruchom aplikację
+# Uruchom serwer
 ./bin/run.sh symfony serve
 ```
-
 
 ## 📊 Architektura
 
@@ -125,27 +111,20 @@ docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up 
 ## 🧪 Testy
 
 ```bash
-# Wszystkie testy jednostkowe
+# Wszystkie testy
 ./bin/run.sh ./bin/phpunit
 
-# Testy z pokryciem kodu
-ENABLE_PCOV=1 ./bin/check-coverage.sh
-
 # Testy wybranego modułu
-./bin/run.sh ./bin/phpunit --filter TextNormalizationServiceTest
+./bin/run.sh ./bin/phpunit --filter OpenAIEmbeddingClientTest
+./bin/run.sh ./bin/phpunit --filter RecommendationServiceTest
 
 # Integracja z usługami zewnętrznymi
 ./bin/run.sh ./bin/console app:test:embedding "tekst testowy"
 ./bin/run.sh ./bin/console app:test:qdrant --create-test-data
 
-# Raport pokrycia kodu
-ENABLE_PCOV=1 ./bin/run.sh ./bin/phpunit --coverage-html=var/coverage-html
+# Pokrycie kodu testami
+./bin/run.sh ./bin/phpunit --coverage-html=var/coverage
 ```
-
-### CI/CD:
-- **GitHub Actions** uruchamia testy na każdym push i pull request
-- **Code coverage** sprawdzany automatycznie (minimum 50%)
-- **PHPStan** i **PHP CS Fixer** dla jakości kodu
 
 ### Migracja danych:
 ```bash
@@ -160,13 +139,6 @@ ENABLE_PCOV=1 ./bin/run.sh ./bin/phpunit --coverage-html=var/coverage-html
 
 1. Zrób fork projektu
 2. Utwórz gałąź dla swojej funkcjonalności (`git checkout -b feature/NiesamowitaFunkcjonalnosc`)
-3. Napisz testy dla nowej funkcjonalności
-4. Uruchom testy: `ENABLE_PCOV=1 ./bin/check-coverage.sh`
-5. Zacommituj swoje zmiany (`git commit -m 'Dodaj jakąś NiesamowitąFunkcjonalność'`)
-6. Wypchnij do swojej gałęzi (`git push origin feature/NiesamowitaFunkcjonalnosc`)
-7. Otwórz Pull Request
-
-### Wymagania dla PR:
-- ✅ Wszystkie testy przechodzą
-- ✅ Code style zgodny z PHP CS Fixer
-- ✅ Brak błędów PHPStan
+3. Zacommituj swoje zmiany (`git commit -m 'Dodaj jakąś NiesamowitąFunkcjonalność'`)
+4. Wypchnij do swojej gałęzi (`git push origin feature/NiesamowitaFunkcjonalnosc`)
+5. Otwórz Pull Request
