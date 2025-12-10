@@ -7,7 +7,6 @@ namespace App\Tests\Unit\Command;
 use App\Command\ProcessEbookEmbeddingsCommand;
 use App\DTO\OpenAIEmbeddingClientInterface;
 use App\Entity\Ebook;
-use App\Entity\EbookEmbedding;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use PHPUnit\Framework\TestCase;

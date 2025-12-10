@@ -76,7 +76,8 @@ class SeedTagsCommandTest extends TestCase
                 // Return existing tag for first tag, null for others
                 static $callCount = 0;
                 ++$callCount;
-                return $callCount === 1 ? $existingTag : null;
+
+                return 1 === $callCount ? $existingTag : null;
             });
 
         // Expect persist to be called for 46 tags (one skipped)

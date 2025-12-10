@@ -24,7 +24,7 @@ class TestEmbeddingCommandTest extends TestCase
     {
         $commandTester = new CommandTester($this->command);
 
-        $text = "Test embedding text";
+        $text = 'Test embedding text';
         $embedding = array_fill(0, 1536, 0.1); // Mock 1536-dimension embedding
 
         $this->openAIEmbeddingClient
@@ -47,7 +47,7 @@ class TestEmbeddingCommandTest extends TestCase
     {
         $commandTester = new CommandTester($this->command);
 
-        $text = "Test batch text";
+        $text = 'Test batch text';
         $embeddings = [
             array_fill(0, 1536, 0.1),
             array_fill(0, 1536, 0.2),
@@ -80,8 +80,8 @@ class TestEmbeddingCommandTest extends TestCase
     {
         $commandTester = new CommandTester($this->command);
 
-        $text = "Test text";
-        $errorMessage = "API connection failed";
+        $text = 'Test text';
+        $errorMessage = 'API connection failed';
 
         $this->openAIEmbeddingClient
             ->expects($this->once())
@@ -100,8 +100,8 @@ class TestEmbeddingCommandTest extends TestCase
     {
         $commandTester = new CommandTester($this->command);
 
-        $text = "Test batch text";
-        $errorMessage = "Batch API failed";
+        $text = 'Test batch text';
+        $errorMessage = 'Batch API failed';
 
         $this->openAIEmbeddingClient
             ->expects($this->once())
