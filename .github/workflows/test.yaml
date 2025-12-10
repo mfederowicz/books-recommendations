@@ -24,8 +24,18 @@ jobs:
           fi
 
       - name: Install PHP dependencies
-        run: make install
+        run: |
+          if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
+            make install
+          else
+            composer install
+          fi
 
       - name: Run tests
-        run: make test
+        run: |
+          if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
+            make test
+          else
+            vendor/bin/phpunit --stderr --colors=never
+          fi
   

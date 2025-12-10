@@ -27,7 +27,17 @@ jobs:
           fi
 
       - name: Install PHP dependencies
-        run: make install
+        run: |
+          if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
+            make install
+          else
+            composer install
+          fi
 
       - name: Run linter
-        run: make lint
+        run: |
+          if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
+            make lint
+          else
+            vendor/bin/php-cs-fixer fix --dry-run --diff
+          fi
