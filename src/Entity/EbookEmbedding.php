@@ -16,9 +16,8 @@ class EbookEmbedding
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Ebook::class)]
-    #[ORM\JoinColumn(name: 'ebook_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    private Ebook $ebook;
+    #[ORM\Column(type: 'string', length: 13)]
+    private string $ebookId;
 
     #[ORM\Column(type: 'json')]
     private array $vector;
@@ -31,6 +30,9 @@ class EbookEmbedding
 
     #[ORM\Column(type: 'json')]
     private array $payloadTags;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $payloadDescription = null;
 
     #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private \DateTimeInterface $createdAt;
@@ -45,14 +47,14 @@ class EbookEmbedding
         return $this->id;
     }
 
-    public function getEbook(): Ebook
+    public function getEbookId(): string
     {
-        return $this->ebook;
+        return $this->ebookId;
     }
 
-    public function setEbook(Ebook $ebook): self
+    public function setEbookId(string $ebookId): self
     {
-        $this->ebook = $ebook;
+        $this->ebookId = $ebookId;
 
         return $this;
     }
@@ -101,6 +103,18 @@ class EbookEmbedding
     public function setPayloadTags(array $payloadTags): self
     {
         $this->payloadTags = $payloadTags;
+
+        return $this;
+    }
+
+    public function getPayloadDescription(): ?string
+    {
+        return $this->payloadDescription;
+    }
+
+    public function setPayloadDescription(?string $payloadDescription): self
+    {
+        $this->payloadDescription = $payloadDescription;
 
         return $this;
     }

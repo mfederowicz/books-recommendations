@@ -14,7 +14,7 @@ final class Version20251208201716 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Revert email index name back to "email" in users table';
     }
 
     public function up(Schema $schema): void

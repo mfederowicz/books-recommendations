@@ -16,7 +16,7 @@ class Ebook
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(type: 'string', length: 13)]
     private string $isbn;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -30,6 +30,12 @@ class Ebook
 
     #[ORM\Column(type: 'string', length: 512, nullable: true)]
     private ?string $comparisonLink = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $mainDescription = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $tags = null;
 
     #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private \DateTimeInterface $createdAt;
@@ -104,6 +110,30 @@ class Ebook
     public function setComparisonLink(?string $comparisonLink): self
     {
         $this->comparisonLink = $comparisonLink;
+
+        return $this;
+    }
+
+    public function getMainDescription(): ?string
+    {
+        return $this->mainDescription;
+    }
+
+    public function setMainDescription(?string $mainDescription): self
+    {
+        $this->mainDescription = $mainDescription;
+
+        return $this;
+    }
+
+    public function getTags(): ?string
+    {
+        return $this->tags;
+    }
+
+    public function setTags(?string $tags): self
+    {
+        $this->tags = $tags;
 
         return $this;
     }

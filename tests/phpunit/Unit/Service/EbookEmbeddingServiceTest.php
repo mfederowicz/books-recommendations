@@ -32,11 +32,12 @@ class EbookEmbeddingServiceTest extends TestCase
         $ebook->method('getIsbn')->willReturn('9781234567890');
 
         $ebookEmbedding = $this->createMock(EbookEmbedding::class);
-        $ebookEmbedding->method('getEbook')->willReturn($ebook);
+        $ebookEmbedding->method('getEbookId')->willReturn('9781234567890');
         $ebookEmbedding->method('getVector')->willReturn([0.1, 0.2, 0.3]);
         $ebookEmbedding->method('getPayloadTitle')->willReturn('Test Book');
         $ebookEmbedding->method('getPayloadAuthor')->willReturn('Test Author');
         $ebookEmbedding->method('getPayloadTags')->willReturn(['fiction']);
+        $ebookEmbedding->method('getPayloadDescription')->willReturn('Test description');
         $ebookEmbedding->method('getCreatedAt')->willReturn(new \DateTime());
 
         // Collection doesn't exist
@@ -70,7 +71,7 @@ class EbookEmbeddingServiceTest extends TestCase
         $ebook->method('getId')->willReturn(123);
 
         $ebookEmbedding = $this->createMock(EbookEmbedding::class);
-        $ebookEmbedding->method('getEbook')->willReturn($ebook);
+        $ebookEmbedding->method('getEbookId')->willReturn('9781234567890');
         $ebookEmbedding->method('getVector')->willReturn([0.1, 0.2, 0.3]);
         $ebookEmbedding->method('getCreatedAt')->willReturn(new \DateTime());
 
@@ -105,14 +106,14 @@ class EbookEmbeddingServiceTest extends TestCase
         // Mock Qdrant search results
         $searchResults = [
             [
-                'id' => '123',
+                'id' => '9781234567890',
                 'score' => 0.95,
-                'payload' => ['ebook_id' => 123],
+                'payload' => ['isbn' => '9781234567890'],
             ],
             [
-                'id' => '456',
+                'id' => '9780987654321',
                 'score' => 0.90,
-                'payload' => ['ebook_id' => 456],
+                'payload' => ['isbn' => '9780987654321'],
             ],
         ];
 
@@ -146,11 +147,13 @@ class EbookEmbeddingServiceTest extends TestCase
 
         $ebookRepo
             ->expects($this->exactly(2))
-            ->method('find')
-            ->willReturnCallback(function ($id) use ($ebook1, $ebook2) {
-                return match ($id) {
-                    123 => $ebook1,
-                    456 => $ebook2,
+            ->method('findOneBy')
+            ->willReturnCallback(function ($criteria) use ($ebook1, $ebook2) {
+                $isbn = $criteria['isbn'] ?? '';
+
+                return match ($isbn) {
+                    '9781234567890' => $ebook1,
+                    '9780987654321' => $ebook2,
                     default => null,
                 };
             });
@@ -161,12 +164,12 @@ class EbookEmbeddingServiceTest extends TestCase
             [
                 'ebook' => $ebook1,
                 'similarity_score' => 0.95,
-                'ebook_id' => 123,
+                'isbn' => '9781234567890',
             ],
             [
                 'ebook' => $ebook2,
                 'similarity_score' => 0.90,
-                'ebook_id' => 456,
+                'isbn' => '9780987654321',
             ],
         ];
 
@@ -209,15 +212,15 @@ class EbookEmbeddingServiceTest extends TestCase
 
     public function testRemoveEbookEmbeddingFromQdrant(): void
     {
-        $ebookId = 123;
+        $isbn = '9781234567890';
 
         $this->qdrantClient
             ->expects($this->once())
             ->method('deletePoint')
-            ->with('ebooks', '123')
+            ->with('ebooks', '9781234567890')
             ->willReturn(true);
 
-        $result = $this->service->removeEbookEmbeddingFromQdrant($ebookId);
+        $result = $this->service->removeEbookEmbeddingFromQdrant($isbn);
 
         $this->assertTrue($result);
     }

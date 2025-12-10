@@ -44,18 +44,16 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
     {
         $this->ensureQdrantCollectionExists();
 
-        $ebook = $ebookEmbedding->getEbook();
-
         return $this->qdrantClient->upsertPoint(
             self::QDRANT_COLLECTION,
             $ebookEmbedding->getVector(),
-            (string) $ebook->getId(), // Use ebook ID as Qdrant point ID
+            $ebookEmbedding->getEbookId(), // Use ISBN as Qdrant point ID
             [
                 'title' => $ebookEmbedding->getPayloadTitle(),
                 'author' => $ebookEmbedding->getPayloadAuthor(),
                 'tags' => $ebookEmbedding->getPayloadTags(),
-                'ebook_id' => $ebook->getId(),
-                'isbn' => $ebook->getIsbn(),
+                'description' => $ebookEmbedding->getPayloadDescription(),
+                'isbn' => $ebookEmbedding->getEbookId(),
                 'created_at' => $ebookEmbedding->getCreatedAt()->format('c'),
             ]
         );
@@ -83,15 +81,15 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
 
         $similarEbooks = [];
         foreach ($searchResults as $result) {
-            $ebookId = $result['payload']['ebook_id'] ?? null;
-            if (null === $ebookId) {
+            $isbn = $result['payload']['isbn'] ?? null;
+            if (null === $isbn) {
                 continue;
             }
 
-            // Get ebook from database
+            // Get ebook from database by ISBN
             $ebook = $this->entityManager
                 ->getRepository(Ebook::class)
-                ->find($ebookId);
+                ->findOneBy(['isbn' => $isbn]);
 
             if (null === $ebook) {
                 continue;
@@ -100,7 +98,7 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
             $similarEbooks[] = [
                 'ebook' => $ebook,
                 'similarity_score' => $result['score'],
-                'ebook_id' => $ebookId,
+                'isbn' => $isbn,
             ];
         }
 
@@ -110,9 +108,9 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
     /**
      * Remove ebook embedding from Qdrant.
      */
-    public function removeEbookEmbeddingFromQdrant(int $ebookId): bool
+    public function removeEbookEmbeddingFromQdrant(string $isbn): bool
     {
-        return $this->qdrantClient->deletePoint(self::QDRANT_COLLECTION, (string) $ebookId);
+        return $this->qdrantClient->deletePoint(self::QDRANT_COLLECTION, $isbn);
     }
 
     /**
