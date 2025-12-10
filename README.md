@@ -1,5 +1,9 @@
 # System Rekomendacji Książek
 
+[![CI](https://github.com/mfederowicz/books-recommender/workflows/Test/badge.svg)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ATest)
+[![Lint](https://github.com/mfederowicz/books-recommender/workflows/Lint/badge.svg)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ALint)
+[![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/mfederowicz/books-recommender/actions)
+
 Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystująca embeddings OpenAI do dopasowania preferencji użytkowników.
 
 ## 🚀 Technologie

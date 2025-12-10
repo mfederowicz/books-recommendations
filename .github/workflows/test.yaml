@@ -1,0 +1,44 @@
+name: Test
+on: [push]
+
+jobs:
+  tests:
+    name: PHP Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: ctype, iconv, mbstring, intl, pcov
+          tools: composer:v2
+
+      - name: Create .env file for tests
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.dist .env
+          fi
+
+      - name: Configure test environment
+        run: |
+          echo "ENABLE_PCOV=1" >> .env
+
+      - name: Install PHP dependencies
+        run: composer install --no-scripts
+
+      - name: Create coverage directory
+        run: mkdir -p var/coverage
+
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml
+
+      - name: Check code coverage
+        uses: johanvanhelden/gha-clover-test-coverage-check@v1
+        with:
+          percentage: 22
+          filename: var/coverage/clover.xml
+  

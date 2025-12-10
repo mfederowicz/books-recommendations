@@ -1,0 +1,34 @@
+name: Lint
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lint:
+    name: PHP Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: ctype, iconv, mbstring, intl
+          tools: composer:v2
+
+      - name: Create .env file for tests
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.dist .env
+          fi
+
+      - name: Install PHP dependencies
+        run: composer install --no-scripts
+
+      - name: Run linter
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
