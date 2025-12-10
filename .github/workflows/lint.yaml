@@ -31,4 +31,9 @@ jobs:
         run: composer install --no-scripts
 
       - name: Run linter
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+        run: |
+          if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
+            ./bin/run.sh vendor/bin/php-cs-fixer fix --dry-run --diff
+          else
+            vendor/bin/php-cs-fixer fix --dry-run --diff
+          fi

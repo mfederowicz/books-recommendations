@@ -9,7 +9,7 @@ use App\Repository\TagRepository;
 use App\Service\TagService;
 use PHPUnit\Framework\TestCase;
 
-final class TagServiceTest extends TestCase
+class TagServiceTest extends TestCase
 {
     private TagRepository $tagRepository;
     private TagService $tagService;
@@ -20,52 +20,59 @@ final class TagServiceTest extends TestCase
         $this->tagService = new TagService($this->tagRepository);
     }
 
-    public function testFindActiveTagsForAutocompleteReturnsEmptyArrayForShortQuery(): void
+    public function testFindActiveTagsForAutocompleteReturnsEmptyForShortQuery(): void
     {
         $result = $this->tagService->findActiveTagsForAutocomplete('a');
 
         $this->assertEquals([], $result);
     }
 
-    public function testFindActiveTagsForAutocompleteCallsRepositoryWithCorrectQuery(): void
+    public function testFindActiveTagsForAutocompleteReturnsEmptyForWhitespaceQuery(): void
     {
-        $query = 'fant';
+        $result = $this->tagService->findActiveTagsForAutocomplete('  ');
+
+        $this->assertEquals([], $result);
+    }
+
+    public function testFindActiveTagsForAutocompleteReturnsResultsForValidQuery(): void
+    {
+        $query = 'sci';
         $expectedTags = [
-            $this->createTag('fantasy'),
-            $this->createTag('fantastic'),
+            $this->createMock(Tag::class),
+            $this->createMock(Tag::class),
         ];
 
         $this->tagRepository
             ->expects($this->once())
             ->method('findActiveTagsStartingWith')
-            ->with($query, 30)
+            ->with('sci', 30)
             ->willReturn($expectedTags);
 
         $result = $this->tagService->findActiveTagsForAutocomplete($query);
 
-        $this->assertEquals($expectedTags, $result);
+        $this->assertSame($expectedTags, $result);
     }
 
     public function testFindActiveTagsForAutocompleteTrimsQuery(): void
     {
-        $query = '  fant  ';
-        $expectedTags = [$this->createTag('fantasy')];
+        $query = '  sci  ';
+        $expectedTags = [$this->createMock(Tag::class)];
 
         $this->tagRepository
             ->expects($this->once())
             ->method('findActiveTagsStartingWith')
-            ->with('fant', 30)
+            ->with('sci', 30)
             ->willReturn($expectedTags);
 
         $result = $this->tagService->findActiveTagsForAutocomplete($query);
 
-        $this->assertEquals($expectedTags, $result);
+        $this->assertSame($expectedTags, $result);
     }
 
-    public function testFindActiveTagByNameCallsRepositoryWithCorrectName(): void
+    public function testFindActiveTagByName(): void
     {
-        $name = 'fantasy';
-        $expectedTag = $this->createTag($name);
+        $name = 'Fiction';
+        $expectedTag = $this->createMock(Tag::class);
 
         $this->tagRepository
             ->expects($this->once())
@@ -75,12 +82,12 @@ final class TagServiceTest extends TestCase
 
         $result = $this->tagService->findActiveTagByName($name);
 
-        $this->assertEquals($expectedTag, $result);
+        $this->assertSame($expectedTag, $result);
     }
 
-    public function testFindActiveTagByNameReturnsNullWhenTagNotFound(): void
+    public function testFindActiveTagByNameReturnsNullWhenNotFound(): void
     {
-        $name = 'nonexistent';
+        $name = 'NonExistentTag';
 
         $this->tagRepository
             ->expects($this->once())
@@ -93,13 +100,35 @@ final class TagServiceTest extends TestCase
         $this->assertNull($result);
     }
 
-    private function createTag(string $name): Tag
+    public function testFindAllActiveTags(): void
     {
-        $tag = new Tag();
-        $tag->setName($name);
-        $tag->setAscii(strtolower($name));
-        $tag->setActive(true);
+        $expectedTags = [
+            $this->createMock(Tag::class),
+            $this->createMock(Tag::class),
+            $this->createMock(Tag::class),
+        ];
 
-        return $tag;
+        $this->tagRepository
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['active' => true], ['name' => 'ASC'])
+            ->willReturn($expectedTags);
+
+        $result = $this->tagService->findAllActiveTags();
+
+        $this->assertSame($expectedTags, $result);
+    }
+
+    public function testFindAllActiveTagsReturnsEmptyArrayWhenNoTags(): void
+    {
+        $this->tagRepository
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['active' => true], ['name' => 'ASC'])
+            ->willReturn([]);
+
+        $result = $this->tagService->findAllActiveTags();
+
+        $this->assertEquals([], $result);
     }
 }

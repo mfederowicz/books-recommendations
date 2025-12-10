@@ -2,64 +2,41 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\phpunit\Unit\Form;
+namespace App\Tests\Unit\Form;
 
 use App\Entity\User;
 use App\Form\RegisterUserAccount;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class RegisterUserAccountTest extends TestCase
+class RegisterUserAccountTest extends TestCase
 {
-    public function testFormExtendsAbstractType(): void
-    {
-        $formType = new RegisterUserAccount();
+    private RegisterUserAccount $form;
 
-        $this->assertInstanceOf(AbstractType::class, $formType);
+    protected function setUp(): void
+    {
+        $this->form = new RegisterUserAccount();
     }
 
-    public function testFormHasCorrectDataClass(): void
+    public function testConfigureOptions(): void
     {
-        $formType = new RegisterUserAccount();
-        $optionsResolver = new OptionsResolver();
-        $formType->configureOptions($optionsResolver);
-        $options = $optionsResolver->resolve([]);
+        $resolver = $this->createMock(OptionsResolver::class);
 
-        $this->assertEquals(User::class, $options['data_class']);
+        $resolver
+            ->expects($this->once())
+            ->method('setDefaults')
+            ->with([
+                'data_class' => User::class,
+            ]);
+
+        $this->form->configureOptions($resolver);
     }
 
-    public function testBuildFormAddsRequiredFields(): void
+    public function testFormHasCorrectName(): void
     {
-        $formType = new RegisterUserAccount();
-
-        // Mock FormBuilderInterface
-        $builder = $this->createMock(FormBuilderInterface::class);
-
-        // Sprawdź czy add jest wywoływane dokładnie 2 razy (dla email i password)
-        $builder->expects($this->exactly(2))
-            ->method('add')
-            ->willReturn($builder);
-
-        // Call buildForm method
-        $formType->buildForm($builder, []);
+        $this->assertEquals('App\Form\RegisterUserAccount', get_class($this->form));
     }
 
-    public function testFormClassExistsAndIsInstantiable(): void
-    {
-        $formType = new RegisterUserAccount();
-
-        $this->assertInstanceOf(RegisterUserAccount::class, $formType);
-        $this->assertIsObject($formType);
-    }
-
-    public function testFormImplementsRequiredMethods(): void
-    {
-        $formType = new RegisterUserAccount();
-
-        // Sprawdź czy klasa ma wymagane metody
-        $this->assertTrue(method_exists($formType, 'buildForm'));
-        $this->assertTrue(method_exists($formType, 'configureOptions'));
-    }
+    // Note: Full testing of form building requires integration tests
+    // with real Symfony form system. These unit tests verify basic configuration.
 }

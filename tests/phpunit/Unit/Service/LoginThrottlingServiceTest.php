@@ -4,111 +4,136 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Service;
 
-use App\DTO\LoginThrottlingServiceInterface;
 use App\Entity\UserFailedLogin;
 use App\Service\LoginThrottlingService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
 
-final class LoginThrottlingServiceTest extends TestCase
+class LoginThrottlingServiceTest extends TestCase
 {
     private EntityManagerInterface $entityManager;
-    private EntityRepository $repository;
-    private LoginThrottlingServiceInterface $service;
+    private LoginThrottlingService $service;
 
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->repository = $this->createMock(EntityRepository::class);
+        $this->service = new LoginThrottlingService($this->entityManager, 5, 15, 60);
+    }
 
+    public function testIsUserBlockedReturnsFalseWhenNoFailedLoginRecord(): void
+    {
+        $email = 'test@example.com';
+
+        $repo = $this->createMock(EntityRepository::class);
         $this->entityManager
+            ->expects($this->once())
             ->method('getRepository')
             ->with(UserFailedLogin::class)
-            ->willReturn($this->repository);
+            ->willReturn($repo);
 
-        $this->service = new LoginThrottlingService(
-            $this->entityManager,
-            3, // maxAttempts
-            15, // blockDurationMinutes
-            60  // resetAttemptsAfterMinutes
-        );
-    }
-
-    public function testIsUserBlockedReturnsFalseWhenNoFailedLoginRecordExists(): void
-    {
-        $this->repository
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
+            ->with(['email' => $email])
             ->willReturn(null);
 
-        $this->assertFalse($this->service->isUserBlocked('test@example.com'));
+        $result = $this->service->isUserBlocked($email);
+
+        $this->assertFalse($result);
     }
 
-    public function testIsUserBlockedReturnsFalseWhenUserIsNotBlocked(): void
+    public function testIsUserBlockedReturnsBlockedStatus(): void
     {
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
-        $failedLogin->setAttemptsCount(2);
-        $failedLogin->setBlockedUntil(null);
+        $email = 'test@example.com';
 
-        $this->repository
+        $failedLogin = $this->createMock(UserFailedLogin::class);
+        $failedLogin
+            ->expects($this->once())
+            ->method('isBlocked')
+            ->willReturn(true);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
+            ->with(['email' => $email])
             ->willReturn($failedLogin);
 
-        $this->assertFalse($this->service->isUserBlocked('test@example.com'));
+        $result = $this->service->isUserBlocked($email);
+
+        $this->assertTrue($result);
     }
 
-    public function testIsUserBlockedReturnsTrueWhenUserIsBlocked(): void
+    public function testRecordFailedLoginAttemptCreatesNewRecord(): void
     {
-        $futureDate = new \DateTime('+1 hour');
+        $email = 'test@example.com';
+        $ipAddress = '192.168.1.1';
 
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
-        $failedLogin->setAttemptsCount(5);
-        $failedLogin->setBlockedUntil($futureDate);
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
 
-        $this->repository
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
-            ->willReturn($failedLogin);
-
-        $this->assertTrue($this->service->isUserBlocked('test@example.com'));
-    }
-
-    public function testRecordFailedLoginAttemptCreatesNewRecordForFirstAttempt(): void
-    {
-        $this->repository
-            ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
+            ->with(['email' => $email])
             ->willReturn(null);
 
         $this->entityManager
             ->expects($this->once())
             ->method('persist')
-            ->with($this->callback(function (UserFailedLogin $failedLogin) {
-                return 'test@example.com' === $failedLogin->getEmail()
-                    && 1 === $failedLogin->getAttemptsCount()
-                    && '192.168.1.1' === $failedLogin->getIpAddress();
+            ->with($this->callback(function ($failedLogin) use ($email, $ipAddress) {
+                return $failedLogin instanceof UserFailedLogin
+                    && $failedLogin->getEmail() === $email
+                    && $failedLogin->getIpAddress() === $ipAddress;
             }));
 
         $this->entityManager
             ->expects($this->once())
             ->method('flush');
 
-        $this->service->recordFailedLoginAttempt('test@example.com', '192.168.1.1');
+        $this->service->recordFailedLoginAttempt($email, $ipAddress);
     }
 
     public function testRecordFailedLoginAttemptIncrementsExistingRecord(): void
     {
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
-        $failedLogin->setAttemptsCount(1);
+        $email = 'test@example.com';
 
-        $this->repository
+        $failedLogin = $this->createMock(UserFailedLogin::class);
+        $failedLogin
+            ->expects($this->once())
+            ->method('incrementAttemptsCount');
+
+        $failedLogin
+            ->expects($this->once())
+            ->method('setLastAttemptAt');
+
+        $failedLogin
+            ->expects($this->once())
+            ->method('setIpAddress');
+
+        $failedLogin
+            ->expects($this->once())
+            ->method('getAttemptsCount')
+            ->willReturn(3); // Less than max attempts
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
             ->willReturn($failedLogin);
 
         $this->entityManager
@@ -119,40 +144,65 @@ final class LoginThrottlingServiceTest extends TestCase
             ->expects($this->once())
             ->method('flush');
 
-        $this->service->recordFailedLoginAttempt('test@example.com', '192.168.1.1');
-
-        $this->assertEquals(2, $failedLogin->getAttemptsCount());
+        $this->service->recordFailedLoginAttempt($email);
     }
 
     public function testRecordFailedLoginAttemptBlocksUserAfterMaxAttempts(): void
     {
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
-        $failedLogin->setAttemptsCount(2); // Will become 3 after increment, which equals maxAttempts
+        $email = 'test@example.com';
+        $maxAttempts = 5;
 
-        $this->repository
+        $failedLogin = $this->createMock(UserFailedLogin::class);
+        $failedLogin
+            ->expects($this->once())
+            ->method('incrementAttemptsCount');
+
+        $failedLogin
+            ->expects($this->once())
+            ->method('setLastAttemptAt');
+
+        $failedLogin
+            ->expects($this->once())
+            ->method('getAttemptsCount')
+            ->willReturn($maxAttempts); // Exactly max attempts
+
+        $failedLogin
+            ->expects($this->once())
+            ->method('setBlockedUntil');
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
             ->willReturn($failedLogin);
 
         $this->entityManager
             ->expects($this->once())
             ->method('flush');
 
-        $this->service->recordFailedLoginAttempt('test@example.com');
-
-        $this->assertEquals(3, $failedLogin->getAttemptsCount());
-        $this->assertNotNull($failedLogin->getBlockedUntil());
+        $this->service->recordFailedLoginAttempt($email);
     }
 
     public function testClearFailedLoginAttemptsRemovesRecord(): void
     {
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
+        $email = 'test@example.com';
 
-        $this->repository
+        $failedLogin = $this->createMock(UserFailedLogin::class);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
             ->willReturn($failedLogin);
 
         $this->entityManager
@@ -164,14 +214,22 @@ final class LoginThrottlingServiceTest extends TestCase
             ->expects($this->once())
             ->method('flush');
 
-        $this->service->clearFailedLoginAttempts('test@example.com');
+        $this->service->clearFailedLoginAttempts($email);
     }
 
-    public function testClearFailedLoginAttemptsDoesNothingWhenNoRecordExists(): void
+    public function testClearFailedLoginAttemptsDoesNothingWhenNoRecord(): void
     {
-        $this->repository
+        $email = 'test@example.com';
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
             ->willReturn(null);
 
         $this->entityManager
@@ -182,56 +240,80 @@ final class LoginThrottlingServiceTest extends TestCase
             ->expects($this->never())
             ->method('flush');
 
-        $this->service->clearFailedLoginAttempts('test@example.com');
+        $this->service->clearFailedLoginAttempts($email);
     }
 
-    public function testGetBlockedUntilReturnsNullWhenNoRecordExists(): void
+    public function testGetBlockedUntil(): void
     {
-        $this->repository
+        $email = 'test@example.com';
+        $blockedUntil = new \DateTime('+15 minutes');
+
+        $failedLogin = $this->createMock(UserFailedLogin::class);
+        $failedLogin
+            ->expects($this->once())
+            ->method('getBlockedUntil')
+            ->willReturn($blockedUntil);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
-            ->willReturn(null);
-
-        $this->assertNull($this->service->getBlockedUntil('test@example.com'));
-    }
-
-    public function testGetBlockedUntilReturnsBlockedUntilDate(): void
-    {
-        $blockedUntil = new \DateTime('+1 hour');
-
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
-        $failedLogin->setBlockedUntil($blockedUntil);
-
-        $this->repository
-            ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
             ->willReturn($failedLogin);
 
-        $this->assertEquals($blockedUntil, $this->service->getBlockedUntil('test@example.com'));
+        $result = $this->service->getBlockedUntil($email);
+
+        $this->assertSame($blockedUntil, $result);
     }
 
-    public function testGetFailedAttemptsCountReturnsZeroWhenNoRecordExists(): void
+    public function testGetFailedAttemptsCount(): void
     {
-        $this->repository
+        $email = 'test@example.com';
+        $attemptsCount = 3;
+
+        $failedLogin = $this->createMock(UserFailedLogin::class);
+        $failedLogin
+            ->expects($this->once())
+            ->method('getAttemptsCount')
+            ->willReturn($attemptsCount);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
-            ->willReturn(null);
-
-        $this->assertEquals(0, $this->service->getFailedAttemptsCount('test@example.com'));
-    }
-
-    public function testGetFailedAttemptsCountReturnsAttemptsCount(): void
-    {
-        $failedLogin = new UserFailedLogin();
-        $failedLogin->setEmail('test@example.com');
-        $failedLogin->setAttemptsCount(3);
-
-        $this->repository
-            ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
             ->willReturn($failedLogin);
 
-        $this->assertEquals(3, $this->service->getFailedAttemptsCount('test@example.com'));
+        $result = $this->service->getFailedAttemptsCount($email);
+
+        $this->assertEquals($attemptsCount, $result);
+    }
+
+    public function testGetFailedAttemptsCountReturnsZeroWhenNoRecord(): void
+    {
+        $email = 'test@example.com';
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repo);
+
+        $repo
+            ->expects($this->once())
+            ->method('findOneBy')
+            ->willReturn(null);
+
+        $result = $this->service->getFailedAttemptsCount($email);
+
+        $this->assertEquals(0, $result);
     }
 }

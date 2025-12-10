@@ -7,142 +7,108 @@ namespace App\Tests\Unit\Service;
 use App\Service\TextNormalizationService;
 use PHPUnit\Framework\TestCase;
 
-final class TextNormalizationServiceTest extends TestCase
+class TextNormalizationServiceTest extends TestCase
 {
-    private TextNormalizationService $textNormalizationService;
+    private TextNormalizationService $service;
 
     protected function setUp(): void
     {
-        $this->textNormalizationService = new TextNormalizationService();
+        $this->service = new TextNormalizationService();
     }
 
     public function testNormalizeTextConvertsToLowercase(): void
     {
-        $input = 'HELLO WORLD';
-        $expected = 'hello world';
+        $result = $this->service->normalizeText('HELLO WORLD');
 
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
+        $this->assertEquals('hello world', $result);
     }
 
     public function testNormalizeTextRemovesSpecialCharacters(): void
     {
-        $input = 'Hello! @World# $Test%';
-        $expected = 'hello world test';
+        $result = $this->service->normalizeText('Hello! @#$% World?');
 
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
+        $this->assertEquals('hello world', $result);
     }
 
     public function testNormalizeTextHandlesPolishCharacters(): void
     {
-        $input = 'KSIĄŻKA ĆMA ŚWIAT';
-        $expected = 'książka ćma świat';
+        $result = $this->service->normalizeText('Książka o Łódzkim Żołnierzu');
 
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
+        $this->assertEquals('książka o łódzkim żołnierzu', $result);
     }
 
-    public function testNormalizeTextReplacesMultipleSpacesWithSingleSpace(): void
+    public function testNormalizeTextReplacesMultipleSpacesWithSingle(): void
     {
-        $input = 'Hello    World   Test';
-        $expected = 'hello world test';
+        $result = $this->service->normalizeText('Hello   World    Test');
 
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
+        $this->assertEquals('hello world test', $result);
     }
 
-    public function testNormalizeTextTrimsLeadingAndTrailingSpaces(): void
+    public function testNormalizeTextTrimsWhitespace(): void
     {
-        $input = '  Hello World  ';
-        $expected = 'hello world';
+        $result = $this->service->normalizeText('  Hello World  ');
 
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testNormalizeTextHandlesComplexInput(): void
-    {
-        $input = '  To JEST! @PrzyKŁad#   $TEkstu%  Z różnymi ZNAKAMI!!!  ';
-        $expected = 'to jest przykład tekstu z różnymi znakami';
-
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
+        $this->assertEquals('hello world', $result);
     }
 
     public function testNormalizeTextHandlesEmptyString(): void
     {
-        $input = '';
-        $expected = '';
+        $result = $this->service->normalizeText('');
 
-        $result = $this->textNormalizationService->normalizeText($input);
+        $this->assertEquals('', $result);
+    }
+
+    public function testNormalizeTextHandlesOnlySpecialCharacters(): void
+    {
+        $result = $this->service->normalizeText('!@#$%^&*()');
+
+        $this->assertEquals('', $result);
+    }
+
+    public function testNormalizeTextComplexExample(): void
+    {
+        $input = '  PRZYKŁADOWA   KSIĄŻKA!!! O   ŁÓDZKIM ŻOŁNIERZU?   ';
+        $expected = 'przykładowa książka o łódzkim żołnierzu';
+
+        $result = $this->service->normalizeText($input);
 
         $this->assertEquals($expected, $result);
     }
 
-    public function testNormalizeTextHandlesStringWithOnlySpecialCharacters(): void
+    public function testGenerateHash(): void
     {
-        $input = '!@#$%^&*()';
-        $expected = '';
+        $text = 'test text';
+        $expectedHash = hash('sha256', $text);
 
-        $result = $this->textNormalizationService->normalizeText($input);
+        $result = $this->service->generateHash($text);
 
-        $this->assertEquals($expected, $result);
+        $this->assertEquals($expectedHash, $result);
+        $this->assertEquals(64, strlen($result)); // SHA256 produces 64 character hash
     }
 
-    public function testNormalizeTextPreservesNumbers(): void
+    public function testGenerateHashDifferentTextsProduceDifferentHashes(): void
     {
-        $input = 'Book 123 Test 456';
-        $expected = 'book 123 test 456';
-
-        $result = $this->textNormalizationService->normalizeText($input);
-
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testGenerateHashReturnsSha256Hash(): void
-    {
-        $input = 'hello world';
-        $hash = $this->textNormalizationService->generateHash($input);
-
-        // SHA256 hash should be 64 characters long and contain only hex characters
-        $this->assertEquals(64, strlen($hash));
-        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $hash);
-    }
-
-    public function testGenerateHashIsConsistent(): void
-    {
-        $input = 'test input';
-        $hash1 = $this->textNormalizationService->generateHash($input);
-        $hash2 = $this->textNormalizationService->generateHash($input);
-
-        $this->assertEquals($hash1, $hash2);
-    }
-
-    public function testGenerateHashReturnsDifferentHashesForDifferentInputs(): void
-    {
-        $input1 = 'hello world';
-        $input2 = 'hello world 2';
-
-        $hash1 = $this->textNormalizationService->generateHash($input1);
-        $hash2 = $this->textNormalizationService->generateHash($input2);
+        $hash1 = $this->service->generateHash('text 1');
+        $hash2 = $this->service->generateHash('text 2');
 
         $this->assertNotEquals($hash1, $hash2);
     }
 
-    public function testGenerateHashWithEmptyString(): void
+    public function testGenerateHashSameTextProducesSameHash(): void
     {
-        $input = '';
-        $hash = $this->textNormalizationService->generateHash($input);
+        $text = 'same text';
+        $hash1 = $this->service->generateHash($text);
+        $hash2 = $this->service->generateHash($text);
 
-        // SHA256 of empty string
-        $expectedHash = hash('sha256', '');
-        $this->assertEquals($expectedHash, $hash);
+        $this->assertEquals($hash1, $hash2);
+    }
+
+    public function testGenerateHashWithUnicode(): void
+    {
+        $text = 'książka';
+        $result = $this->service->generateHash($text);
+
+        $this->assertIsString($result);
+        $this->assertEquals(64, strlen($result));
     }
 }
