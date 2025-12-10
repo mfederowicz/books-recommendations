@@ -13,7 +13,11 @@ mkdir -p var/coverage
 
 # Run PHPUnit with coverage
 echo "📊 Running tests with coverage analysis..."
-ENABLE_PCOV=1 ./bin/run.sh vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml --coverage-html=var/coverage-html
+if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
+    ENABLE_PCOV=1 ./bin/run.sh vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml --coverage-html=var/coverage-html
+else
+    ENABLE_PCOV=1 vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml --coverage-html=var/coverage-html
+fi
 
 echo
 echo "📈 Coverage Report:"

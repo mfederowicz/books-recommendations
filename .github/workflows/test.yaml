@@ -38,12 +38,7 @@ jobs:
         run: mkdir -p var/coverage
 
       - name: Run tests with coverage
-        run: |
-          if command -v docker &> /dev/null && [ -f bin/docker-compose.sh ]; then
-            ./bin/run.sh vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml
-          else
-            vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml
-          fi
+        run: vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml
 
       - name: Check code coverage
         uses: johanvanhelden/gha-clover-test-coverage-check@v1
