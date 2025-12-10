@@ -37,3 +37,7 @@ final class Version20251209100000 extends AbstractMigration
         $this->addSql('DROP TABLE users_failed_logins');
     }
 }
+
+
+
+

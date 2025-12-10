@@ -25,7 +25,7 @@ final class ResetUserPasswordCommand extends Command
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
     ) {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -49,12 +49,14 @@ final class ResetUserPasswordCommand extends Command
         // Validate email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $io->error('Invalid email format.');
+
             return Command::FAILURE;
         }
 
         // Validate password length (basic validation)
         if (strlen($newPassword) < 8) {
             $io->error('Password must be at least 8 characters long.');
+
             return Command::FAILURE;
         }
 
@@ -64,6 +66,7 @@ final class ResetUserPasswordCommand extends Command
 
         if (!$user) {
             $io->error(sprintf('User with email "%s" not found.', $email));
+
             return Command::FAILURE;
         }
 

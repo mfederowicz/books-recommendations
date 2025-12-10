@@ -12,8 +12,9 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 final class LoginSuccessListener
 {
     public function __construct(
-        private LoginThrottlingServiceInterface $loginThrottlingService
-    ) {}
+        private LoginThrottlingServiceInterface $loginThrottlingService,
+    ) {
+    }
 
     public function __invoke(LoginSuccessEvent $event): void
     {

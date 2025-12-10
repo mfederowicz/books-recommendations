@@ -191,7 +191,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = ['ROLE_USER']; // Everyone has at least ROLE_USER
 
-        if ($this->role === 'admin') {
+        if ('admin' === $this->role) {
             $roles[] = 'ROLE_ADMIN';
         }
 

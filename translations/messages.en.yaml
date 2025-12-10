@@ -1,0 +1,107 @@
+# English translations for Books Recommender application
+
+# Application titles and navigation
+app:
+  title: "Books Recommender"
+  title_login: "Login - Books Recommender"
+  title_register: "Register - Books Recommender"
+  title_dashboard: "Dashboard - Books Recommender"
+  title_homepage: "Home - Books Recommender"
+
+# Navigation
+nav:
+  welcome: "Welcome, %email%"
+  logout: "Logout"
+  register: "Register"
+  footer: "© 2025 Books Recommender. Built with Symfony & Tailwind CSS."
+
+# Authentication pages
+auth:
+  login:
+    heading: "Sign in to your account"
+    description: "Access your personalized book recommendations"
+    email_label: "Email address"
+    email_placeholder: "Enter your email"
+    password_label: "Password"
+    password_placeholder: "Enter your password"
+    button: "Sign in"
+    no_account: "Don't have an account?"
+    register_link: "Register here"
+
+  register:
+    heading: "Create your account"
+    description: "Join Books Recommender and discover your next favorite book"
+    email_label: "Email address"
+    email_placeholder: "Enter your email"
+    password_label: "Password"
+    password_placeholder: "Enter your password (min. 8 characters)"
+    confirm_password_label: "Confirm Password"
+    confirm_password_placeholder: "Confirm your password"
+    button: "Create Account"
+    have_account: "Already have an account?"
+    login_link: "Sign in here"
+
+  throttling:
+    blocked: "Account has been temporarily blocked due to too many failed login attempts. Try again after %time%."
+
+# Dashboard
+dashboard:
+  find_book: "Find your next book"
+  description_instruction: "Describe the book you want to read (30-500 characters)"
+  book_description_label: "Book Description"
+  book_description_placeholder: "E.g. A fascinating science fiction novel about time travel, where the protagonist discovers a way to change the past but must face paradoxes and the consequences of his decisions..."
+  characters: "characters"
+  tags_label_text: "Select tags"
+  minimum_tags: "minimum 2"
+  tags_placeholder: "Type a tag and press Enter..."
+  reset_button: "Reset"
+  find_recommendations_button: "Find Recommendations"
+  your_recommendations: "Your Recommendations"
+  recommendations_description: "List of books found based on your descriptions"
+  no_recommendations: "No recommendations yet"
+  add_description_message: "Add a book description above to get personalized recommendations."
+  recommendation_prefix: "Recommendation #%id%"
+
+# Homepage
+homepage:
+  welcome: "Welcome to Books Recommender"
+  subtitle: "Discover your next favorite book with AI-powered recommendations"
+  features:
+    smart_recommendations:
+      title: "Smart Recommendations"
+      description: "AI-powered book suggestions based on your preferences"
+    fast_search:
+      title: "Fast Search"
+      description: "Quick and efficient book discovery across our database"
+    personalized:
+      title: "Personalized"
+      description: "Tailored recommendations that match your reading style"
+  get_started: "Get Started"
+  have_account: "Already have an account?"
+  sign_in: "Sign in"
+
+# Components
+components:
+  recommendations:
+    success:
+      title: "Recommendation saved successfully!"
+      message: "Your book recommendation has been processed. We'll find similar books for you soon."
+    error:
+      title: "Error"
+      generic: "An error occurred while processing your recommendation. Please try again."
+      description_length: "Description must be between 30 and 500 characters."
+      min_tags: "Please select at least 2 tags."
+      invalid_tags: "Some selected tags are invalid. Please try again."
+
+# Form validation messages
+form:
+  validation:
+    email_required: "Please enter your email address"
+    email_invalid: "Please enter a valid email address"
+    password_required: "Please enter a password"
+    password_min_length: "Your password should be at least %limit% characters"
+    password_mismatch: "The password fields must match"
+
+# Flash messages
+flash:
+  registration_success: "Registration successful! You can now log in."

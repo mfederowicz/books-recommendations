@@ -8,7 +8,7 @@ return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@Symfony' => true,
-        'final_class' => true,
+        'final_class' => false,
         'declare_strict_types' => true,
     ])
     ->setFinder($finder)

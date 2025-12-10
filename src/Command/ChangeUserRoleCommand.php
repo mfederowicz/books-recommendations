@@ -45,6 +45,7 @@ final class ChangeUserRoleCommand extends Command
         $allowedRoles = ['user', 'admin', 'read_only'];
         if (!in_array($newRole, $allowedRoles, true)) {
             $io->error(sprintf('Invalid role "%s". Allowed roles are: %s', $newRole, implode(', ', $allowedRoles)));
+
             return Command::FAILURE;
         }
 
@@ -54,12 +55,14 @@ final class ChangeUserRoleCommand extends Command
 
         if (!$user) {
             $io->error(sprintf('User with email "%s" not found.', $email));
+
             return Command::FAILURE;
         }
 
         // Check if user already has the requested role
         if ($user->getRole() === $newRole) {
             $io->warning(sprintf('User "%s" already has the role "%s".', $email, $newRole));
+
             return Command::SUCCESS;
         }
 

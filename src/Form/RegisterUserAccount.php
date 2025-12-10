@@ -22,23 +22,23 @@ final class RegisterUserAccount extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'constraints' => [
-                    new NotBlank(message: 'Please enter your email address'),
-                    new Email(message: 'Please enter a valid email address'),
+                    new NotBlank(message: 'form.validation.email_required'),
+                    new Email(message: 'form.validation.email_invalid'),
                 ],
             ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'invalid_message' => 'The password fields must match.',
+                'invalid_message' => 'form.validation.password_mismatch',
                 'options' => ['attr' => ['class' => 'password-field']],
                 'required' => true,
-                'first_options' => ['label' => 'Password'],
-                'second_options' => ['label' => 'Repeat Password'],
+                'first_options' => ['label' => 'auth.register.password_label'],
+                'second_options' => ['label' => 'auth.register.confirm_password_label'],
                 'mapped' => false,
                 'constraints' => [
-                    new NotBlank(message: 'Please enter a password'),
+                    new NotBlank(message: 'form.validation.password_required'),
                     new Length(
                         min: 8,
-                        minMessage: 'Your password should be at least {{ limit }} characters',
+                        minMessage: 'form.validation.password_min_length',
                         max: 4096
                     ),
                 ],

@@ -72,7 +72,7 @@ class UserFailedLogin
 
     public function incrementAttemptsCount(): self
     {
-        $this->attemptsCount++;
+        ++$this->attemptsCount;
 
         return $this;
     }
@@ -103,7 +103,7 @@ class UserFailedLogin
 
     public function isBlocked(): bool
     {
-        return $this->blockedUntil !== null && $this->blockedUntil > new \DateTime();
+        return null !== $this->blockedUntil && $this->blockedUntil > new \DateTime();
     }
 
     public function getIpAddress(): ?string

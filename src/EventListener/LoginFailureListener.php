@@ -14,21 +14,22 @@ final class LoginFailureListener
 {
     public function __construct(
         private LoginThrottlingServiceInterface $loginThrottlingService,
-        private RequestStack $requestStack
-    ) {}
+        private RequestStack $requestStack,
+    ) {
+    }
 
     public function __invoke(AuthenticationFailureEvent $event): void
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request === null) {
+        if (null === $request) {
             return;
         }
 
         $email = $request->request->get('_username') ?? $request->request->get('email');
         $ipAddress = $request->getClientIp();
 
-        if ($email === null || !is_string($email)) {
+        if (null === $email || !is_string($email)) {
             return;
         }
 

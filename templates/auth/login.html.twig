@@ -1,16 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Login - Books Recommender{% endblock %}
+{% block title %}{{ 'app.title_login'|trans }}{% endblock %}
 
 {% block body %}
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Sign in to your account
+                {{ 'auth.login.heading'|trans }}
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Access your personalized book recommendations
+                {{ 'auth.login.description'|trans }}
             </p>
         </div>
 
@@ -36,24 +36,24 @@
 
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700">
-                        Email address
+                        {{ 'auth.login.email_label'|trans }}
                     </label>
                     <div class="mt-1">
                         <input id="username" name="_username" type="email" autocomplete="email" required
                                value="{{ last_username }}"
                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               placeholder="Enter your email">
+                               placeholder="{{ 'auth.login.email_placeholder'|trans }}">
                     </div>
                 </div>
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">
-                        Password
+                        {{ 'auth.login.password_label'|trans }}
                     </label>
                     <div class="mt-1">
                         <input id="password" name="_password" type="password" autocomplete="current-password" required
                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                               placeholder="Enter your password">
+                               placeholder="{{ 'auth.login.password_placeholder'|trans }}">
                     </div>
                 </div>
 
@@ -62,15 +62,15 @@
                 <div>
                     <button type="submit"
                             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Sign in
+                        {{ 'auth.login.button'|trans }}
                     </button>
                 </div>
 
                 <div class="text-center">
                     <p class="text-sm text-gray-600">
-                        Don't have an account?
+                        {{ 'auth.login.no_account'|trans }}
                         <a href="{{ path('app_register') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
-                            Register here
+                            {{ 'auth.login.register_link'|trans }}
                         </a>
                     </p>
                 </div>
