@@ -2,6 +2,9 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    # Default locale
+    default_locale: 'pl'
+
     # Note that the session will be started ONLY if you read or write from it.
     session:
         cookie_lifetime: 43200  # 12 hours in seconds

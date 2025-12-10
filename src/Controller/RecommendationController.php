@@ -29,13 +29,13 @@ final class RecommendationController extends AbstractController
         // Walidacja danych
         if (empty($description) || strlen($description) < 30 || strlen($description) > 500) {
             return $this->render('components/recommendation_error.html.twig', [
-                'error' => 'Description must be between 30 and 500 characters.',
+                'error' => 'components.recommendations.error.description_length',
             ], new Response('', 400));
         }
 
         if (count($tagNames) < 2) {
             return $this->render('components/recommendation_error.html.twig', [
-                'error' => 'Please select at least 2 tags.',
+                'error' => 'components.recommendations.error.min_tags',
             ], new Response('', 400));
         }
 
@@ -51,7 +51,7 @@ final class RecommendationController extends AbstractController
 
             if (count($tags) < 2) {
                 return $this->render('components/recommendation_error.html.twig', [
-                    'error' => 'Some selected tags are invalid. Please try again.',
+                    'error' => 'components.recommendations.error.invalid_tags',
                 ], new Response('', 400));
             }
 
@@ -68,7 +68,7 @@ final class RecommendationController extends AbstractController
             ]);
         } catch (\Exception $e) {
             return $this->render('components/recommendation_error.html.twig', [
-                'error' => 'An error occurred while processing your recommendation. Please try again.',
+                'error' => 'components.recommendations.error.generic',
             ], new Response('', 500));
         }
     }

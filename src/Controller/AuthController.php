@@ -15,6 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class AuthController extends AbstractController
 {
@@ -22,17 +23,20 @@ final class AuthController extends AbstractController
     private UserPasswordHasherInterface $passwordHasher;
     private UserAuthenticatorInterface $userAuthenticator;
     private LoginThrottlingServiceInterface $loginThrottlingService;
+    private TranslatorInterface $translator;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
         UserAuthenticatorInterface $userAuthenticator,
         LoginThrottlingServiceInterface $loginThrottlingService,
+        TranslatorInterface $translator,
     ) {
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
         $this->userAuthenticator = $userAuthenticator;
         $this->loginThrottlingService = $loginThrottlingService;
+        $this->translator = $translator;
     }
 
     #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
@@ -55,7 +59,7 @@ final class AuthController extends AbstractController
             $this->entityManager->flush();
 
             // Add success flash message and redirect to homepage
-            $this->addFlash('success', 'Registration successful! You can now log in.');
+            $this->addFlash('success', $this->translator->trans('flash.registration_success'));
 
             return $this->redirectToRoute('homepage');
         }
@@ -77,10 +81,9 @@ final class AuthController extends AbstractController
         $throttlingError = null;
         if ($lastUsername && $this->loginThrottlingService->isUserBlocked($lastUsername)) {
             $blockedUntil = $this->loginThrottlingService->getBlockedUntil($lastUsername);
-            $throttlingError = sprintf(
-                'Account has been temporarily blocked due to too many failed login attempts. Try again after %s.',
-                $blockedUntil ? $blockedUntil->format('H:i:s') : 'some time'
-            );
+            $throttlingError = $this->translator->trans('auth.throttling.blocked', [
+                '%time%' => $blockedUntil ? $blockedUntil->format('H:i:s') : 'pewnym czasie'
+            ]);
         }
 
         // If there was a login error, record the failed attempt

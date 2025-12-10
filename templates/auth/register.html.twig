@@ -1,16 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register - Books Recommender{% endblock %}
+{% block title %}{{ 'app.title_register'|trans }}{% endblock %}
 
 {% block body %}
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Create your account
+                {{ 'auth.register.heading'|trans }}
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Join Books Recommender and discover your next favorite book
+                {{ 'auth.register.description'|trans }}
             </p>
         </div>
 
@@ -33,14 +33,14 @@
                 </div>
 
                 <div>
-                    {{ form_label(form.email, 'Email address', {
+                    {{ form_label(form.email, 'auth.register.email_label'|trans, {
                         'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
                     }) }}
                     <div class="mt-1">
                         {{ form_widget(form.email, {
                             'attr': {
                                 'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                                'placeholder': 'Enter your email'
+                                'placeholder': 'auth.register.email_placeholder'|trans
                             }
                         }) }}
                         {{ form_errors(form.email, {
@@ -50,14 +50,14 @@
                 </div>
 
                 <div>
-                    {{ form_label(form.password.first, 'Password', {
+                    {{ form_label(form.password.first, 'auth.register.password_label'|trans, {
                         'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
                     }) }}
                     <div class="mt-1">
                         {{ form_widget(form.password.first, {
                             'attr': {
                                 'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                                'placeholder': 'Enter your password (min. 8 characters)'
+                                'placeholder': 'auth.register.password_placeholder'|trans
                             }
                         }) }}
                         {{ form_errors(form.password.first, {
@@ -67,14 +67,14 @@
                 </div>
 
                 <div>
-                    {{ form_label(form.password.second, 'Confirm Password', {
+                    {{ form_label(form.password.second, 'auth.register.confirm_password_label'|trans, {
                         'label_attr': {'class': 'block text-sm font-medium text-gray-700'}
                     }) }}
                     <div class="mt-1">
                         {{ form_widget(form.password.second, {
                             'attr': {
                                 'class': 'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                                'placeholder': 'Confirm your password'
+                                'placeholder': 'auth.register.confirm_password_placeholder'|trans
                             }
                         }) }}
                         {{ form_errors(form.password, {
@@ -86,13 +86,16 @@
                 <div>
                     <button type="submit"
                             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Create Account
+                        {{ 'auth.register.button'|trans }}
                     </button>
                 </div>
 
                 <div class="text-center">
                     <p class="text-sm text-gray-600">
-                        Registration is currently available. Login functionality will be added soon.
+                        {{ 'auth.register.have_account'|trans }}
+                        <a href="{{ path('app_login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                            {{ 'auth.register.login_link'|trans }}
+                        </a>
                     </p>
                 </div>
 

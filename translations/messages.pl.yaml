@@ -1,0 +1,107 @@
+# Polish translations for Books Recommender application
+
+# Application titles and navigation
+app:
+  title: "Rekomendacje Książek"
+  title_login: "Logowanie - Rekomendacje Książek"
+  title_register: "Rejestracja - Rekomendacje Książek"
+  title_dashboard: "Panel - Rekomendacje Książek"
+  title_homepage: "Strona główna - Rekomendacje Książek"
+
+# Navigation
+nav:
+  welcome: "Witaj, %email%"
+  logout: "Wyloguj się"
+  register: "Zarejestruj się"
+  footer: "© 2025 Rekomendacje Książek. Zbudowane z Symfony & Tailwind CSS."
+
+# Authentication pages
+auth:
+  login:
+    heading: "Zaloguj się do swojego konta"
+    description: "Uzyskaj dostęp do spersonalizowanych rekomendacji książek"
+    email_label: "Adres email"
+    email_placeholder: "Wpisz swój adres email"
+    password_label: "Hasło"
+    password_placeholder: "Wpisz swoje hasło"
+    button: "Zaloguj się"
+    no_account: "Nie masz konta?"
+    register_link: "Zarejestruj się tutaj"
+
+  register:
+    heading: "Utwórz swoje konto"
+    description: "Dołącz do Rekomendacji Książek i odkryj swoją następną ulubioną książkę"
+    email_label: "Adres email"
+    email_placeholder: "Wpisz swój adres email"
+    password_label: "Hasło"
+    password_placeholder: "Wpisz swoje hasło (min. 8 znaków)"
+    confirm_password_label: "Potwierdź hasło"
+    confirm_password_placeholder: "Potwierdź swoje hasło"
+    button: "Utwórz konto"
+    have_account: "Masz już konto?"
+    login_link: "Zaloguj się tutaj"
+
+  throttling:
+    blocked: "Konto zostało tymczasowo zablokowane z powodu zbyt wielu nieudanych prób logowania. Spróbuj ponownie po %time%."
+
+# Dashboard
+dashboard:
+  find_book: "Znajdź swoją następną książkę"
+  description_instruction: "Opisz książkę, którą chcesz przeczytać (30-500 znaków)"
+  book_description_label: "Opis książki"
+  book_description_placeholder: "Np. Fascynująca powieść science fiction o podróżach w czasie, gdzie protagonista odkrywa sposób na zmianę przeszłości, ale musi stawić czoła paradoksom i konsekwencjom swoich decyzji..."
+  characters: "znaków"
+  tags_label_text: "Wybierz tagi"
+  minimum_tags: "minimum 2"
+  tags_placeholder: "Wpisz tag i naciśnij Enter..."
+  reset_button: "Wyczyść"
+  find_recommendations_button: "Znajdź rekomendacje"
+  your_recommendations: "Twoje rekomendacje"
+  recommendations_description: "Lista książek znalezionych na podstawie Twoich opisów"
+  no_recommendations: "Brak rekomendacji"
+  add_description_message: "Dodaj opis książki powyżej, aby otrzymać spersonalizowane rekomendacje."
+  recommendation_prefix: "Rekomendacja #%id%"
+
+# Homepage
+homepage:
+  welcome: "Witaj w Rekomendacjach Książek"
+  subtitle: "Odkryj swoją następną ulubioną książkę dzięki rekomendacjom wspieranym przez AI"
+  features:
+    smart_recommendations:
+      title: "Inteligentne rekomendacje"
+      description: "Sugestie książek wsparte przez AI, oparte na Twoich preferencjach"
+    fast_search:
+      title: "Szybkie wyszukiwanie"
+      description: "Szybkie i efektywne odkrywanie książek w naszej bazie danych"
+    personalized:
+      title: "Spersonalizowane"
+      description: "Dostosowane rekomendacje, które pasują do Twojego stylu czytania"
+  get_started: "Rozpocznij"
+  have_account: "Masz już konto?"
+  sign_in: "Zaloguj się"
+
+# Components
+components:
+  recommendations:
+    success:
+      title: "Rekomendacja została zapisana pomyślnie!"
+      message: "Twoja rekomendacja książki została przetworzona. Wkrótce znajdziemy podobne książki dla Ciebie."
+    error:
+      title: "Błąd"
+      generic: "Wystąpił błąd podczas przetwarzania Twojej rekomendacji. Spróbuj ponownie."
+      description_length: "Opis musi mieć od 30 do 500 znaków."
+      min_tags: "Proszę wybrać co najmniej 2 tagi."
+      invalid_tags: "Niektóre wybrane tagi są nieprawidłowe. Spróbuj ponownie."
+
+# Form validation messages
+form:
+  validation:
+    email_required: "Proszę podać adres email"
+    email_invalid: "Proszę podać prawidłowy adres email"
+    password_required: "Proszę podać hasło"
+    password_min_length: "Hasło powinno mieć co najmniej %limit% znaków"
+    password_mismatch: "Pola hasła muszą być identyczne"
+
+# Flash messages
+flash:
+  registration_success: "Rejestracja zakończona pomyślnie! Możesz się teraz zalogować."
