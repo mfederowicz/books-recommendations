@@ -2,94 +2,77 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Service;
+namespace App\Tests\phpunit\Unit\Service;
 
 use App\Service\OpenAIEmbeddingClient;
 use PHPUnit\Framework\TestCase;
 
-final class OpenAIEmbeddingClientTest extends TestCase
+class OpenAIEmbeddingClientTest extends TestCase
 {
-    private string $originalApiKey;
-    private string $originalModel;
+    private OpenAIEmbeddingClient $client;
 
     protected function setUp(): void
     {
-        // Zachowaj oryginalne zmienne środowiskowe
-        $this->originalApiKey = getenv('OPENAI_API_KEY') ?: '';
-        $this->originalModel = getenv('OPENAI_MODEL') ?: '';
-
-        // Ustaw testowe zmienne środowiskowe
-        putenv('OPENAI_API_KEY=test-api-key');
+        // Set required environment variables
+        putenv('OPENAI_API_KEY=test_key');
         putenv('OPENAI_MODEL=text-embedding-3-small');
-        $_ENV['OPENAI_API_KEY'] = 'test-api-key';
-        $_ENV['OPENAI_MODEL'] = 'text-embedding-3-small';
+
+        $this->client = new OpenAIEmbeddingClient();
     }
 
     protected function tearDown(): void
     {
-        // Przywróć oryginalne zmienne środowiskowe
-        putenv('OPENAI_API_KEY='.$this->originalApiKey);
-        putenv('OPENAI_MODEL='.$this->originalModel);
-
-        if ('' === $this->originalApiKey) {
-            unset($_ENV['OPENAI_API_KEY']);
-        } else {
-            $_ENV['OPENAI_API_KEY'] = $this->originalApiKey;
-        }
-
-        if ('' === $this->originalModel) {
-            unset($_ENV['OPENAI_MODEL']);
-        } else {
-            $_ENV['OPENAI_MODEL'] = $this->originalModel;
-        }
+        // Clean up environment variables
+        putenv('OPENAI_API_KEY');
+        putenv('OPENAI_MODEL');
     }
 
     public function testConstructorThrowsExceptionWhenApiKeyNotSet(): void
     {
+        // Clean up environment variables set in setUp
         putenv('OPENAI_API_KEY=');
+        putenv('OPENAI_MODEL=');
         unset($_ENV['OPENAI_API_KEY']);
+        unset($_ENV['OPENAI_MODEL']);
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Required environment variable \'OPENAI_API_KEY\' is not set');
+        $this->expectExceptionMessage("Required environment variable 'OPENAI_API_KEY' is not set");
 
         new OpenAIEmbeddingClient();
     }
 
-    // Test usunięty z powodu problemów z czyszczeniem zmiennych środowiskowych w testach
-    // Funkcjonalność jest sprawdzana przez testConstructorSucceedsWithValidEnvironmentVariables
-
-    public function testConstructorSucceedsWithValidEnvironmentVariables(): void
+    public function testConstructorUsesDefaultModelWhenNotSet(): void
     {
-        // Test powinien przejść bez wyjątków
+        putenv('OPENAI_MODEL');
+
         $client = new OpenAIEmbeddingClient();
-        $this->assertInstanceOf(OpenAIEmbeddingClient::class, $client);
+
+        $reflection = new \ReflectionClass($client);
+        $modelProperty = $reflection->getProperty('model');
+        $modelProperty->setAccessible(true);
+
+        $this->assertEquals('text-embedding-3-small', $modelProperty->getValue($client));
+    }
+
+    public function testGetEmbeddingsBatchThrowsExceptionForEmptyTexts(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('All texts must be non-empty strings');
+
+        $this->client->getEmbeddingsBatch(['']);
     }
 
     public function testGetEmbeddingsBatchThrowsExceptionForInvalidTexts(): void
     {
-        $client = new OpenAIEmbeddingClient();
-
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('All texts must be non-empty strings');
 
-        $client->getEmbeddingsBatch(['valid text', '']);
-    }
-
-    public function testGetEmbeddingsBatchThrowsExceptionForNonStringTexts(): void
-    {
-        $client = new OpenAIEmbeddingClient();
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('All texts must be non-empty strings');
-
-        $client->getEmbeddingsBatch(['valid text', 123]);
+        $this->client->getEmbeddingsBatch([123]);
     }
 
     public function testGetEmbeddingsBatchReturnsEmptyArrayForEmptyInput(): void
     {
-        $client = new OpenAIEmbeddingClient();
-
-        $result = $client->getEmbeddingsBatch([]);
+        $result = $this->client->getEmbeddingsBatch([]);
 
         $this->assertEquals([], $result);
     }

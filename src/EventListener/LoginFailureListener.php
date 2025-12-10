@@ -7,9 +7,9 @@ namespace App\EventListener;
 use App\DTO\LoginThrottlingServiceInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Http\Event\AuthenticationFailureEvent;
+use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 
-#[AsEventListener(event: AuthenticationFailureEvent::class)]
+#[AsEventListener(event: LoginFailureEvent::class)]
 final class LoginFailureListener
 {
     public function __construct(
@@ -18,7 +18,7 @@ final class LoginFailureListener
     ) {
     }
 
-    public function __invoke(AuthenticationFailureEvent $event): void
+    public function __invoke(LoginFailureEvent $event): void
     {
         $request = $this->requestStack->getCurrentRequest();
 

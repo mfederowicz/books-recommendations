@@ -12,132 +12,149 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-final class ResetUserPasswordCommandTest extends TestCase
+class ResetUserPasswordCommandTest extends TestCase
 {
     private EntityManagerInterface $entityManager;
-    private EntityRepository $userRepository;
     private UserPasswordHasherInterface $passwordHasher;
-    private CommandTester $commandTester;
+    private ResetUserPasswordCommand $command;
 
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->userRepository = $this->createMock(EntityRepository::class);
         $this->passwordHasher = $this->createMock(UserPasswordHasherInterface::class);
-
-        $this->entityManager
-            ->method('getRepository')
-            ->with(User::class)
-            ->willReturn($this->userRepository);
-
-        $command = new ResetUserPasswordCommand($this->entityManager, $this->passwordHasher);
-        $this->commandTester = new CommandTester($command);
+        $this->command = new ResetUserPasswordCommand($this->entityManager, $this->passwordHasher);
     }
 
-    public function testExecuteSuccessfullyResetsPassword(): void
+    public function testExecuteResetsPasswordSuccessfully(): void
     {
-        $user = new User();
-        $user->setEmail('test@example.com');
-        $user->setPasswordHash('old_hash');
-        $user->setMustChangePassword(true);
+        $commandTester = new CommandTester($this->command);
 
-        $this->userRepository
+        $email = 'test@example.com';
+        $newPassword = 'newpassword123';
+        $hashedPassword = 'hashed_password';
+
+        // Mock user
+        $user = $this->createMock(User::class);
+
+        // Mock repository
+        $userRepository = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(User::class)
+            ->willReturn($userRepository);
+
+        $userRepository
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
+            ->with(['email' => $email])
             ->willReturn($user);
 
+        // Mock password hasher
         $this->passwordHasher
             ->expects($this->once())
             ->method('hashPassword')
-            ->with($user, 'newpassword123')
-            ->willReturn('hashed_new_password');
+            ->with($user, $newPassword)
+            ->willReturn($hashedPassword);
+
+        // Expect user methods to be called
+        $user
+            ->expects($this->once())
+            ->method('setPasswordHash')
+            ->with($hashedPassword);
+
+        $user
+            ->expects($this->once())
+            ->method('setUpdatedAt')
+            ->with($this->isInstanceOf(\DateTime::class));
+
+        $user
+            ->expects($this->once())
+            ->method('setMustChangePassword')
+            ->with(false);
 
         $this->entityManager
             ->expects($this->once())
             ->method('flush');
 
-        $exitCode = $this->commandTester->execute([
-            'email' => 'test@example.com',
-            'password' => 'newpassword123',
+        $exitCode = $commandTester->execute([
+            'email' => $email,
+            'password' => $newPassword,
         ]);
 
         $this->assertEquals(0, $exitCode);
-        $this->assertStringContainsString('Password for user "test@example.com" has been successfully reset.', $this->commandTester->getDisplay());
-
-        // Verify password was updated
-        $this->assertEquals('hashed_new_password', $user->getPasswordHash());
-        // Verify mustChangePassword was set to false
-        $this->assertFalse($user->isMustChangePassword());
-        // Verify updatedAt was set
-        $this->assertInstanceOf(\DateTime::class, $user->getUpdatedAt());
+        $this->assertStringContainsString('Password for user "test@example.com" has been successfully reset', $commandTester->getDisplay());
     }
 
-    public function testExecuteFailsWithInvalidEmailFormat(): void
+    public function testExecuteFailsWithInvalidEmail(): void
     {
-        $exitCode = $this->commandTester->execute([
+        $commandTester = new CommandTester($this->command);
+
+        $exitCode = $commandTester->execute([
             'email' => 'invalid-email',
-            'password' => 'newpassword123',
+            'password' => 'validpassword123',
         ]);
 
         $this->assertEquals(1, $exitCode);
-        $this->assertStringContainsString('Invalid email format.', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Invalid email format', $commandTester->getDisplay());
     }
 
     public function testExecuteFailsWithShortPassword(): void
     {
-        $exitCode = $this->commandTester->execute([
+        $commandTester = new CommandTester($this->command);
+
+        $exitCode = $commandTester->execute([
             'email' => 'test@example.com',
             'password' => 'short',
         ]);
 
         $this->assertEquals(1, $exitCode);
-        $this->assertStringContainsString('Password must be at least 8 characters long.', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Password must be at least 8 characters long', $commandTester->getDisplay());
     }
 
     public function testExecuteFailsWhenUserNotFound(): void
     {
-        $this->userRepository
+        $commandTester = new CommandTester($this->command);
+
+        $email = 'nonexistent@example.com';
+
+        // Mock repository
+        $userRepository = $this->createMock(EntityRepository::class);
+        $this->entityManager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(User::class)
+            ->willReturn($userRepository);
+
+        $userRepository
+            ->expects($this->once())
             ->method('findOneBy')
-            ->with(['email' => 'nonexistent@example.com'])
+            ->with(['email' => $email])
             ->willReturn(null);
 
-        $exitCode = $this->commandTester->execute([
-            'email' => 'nonexistent@example.com',
-            'password' => 'newpassword123',
+        $exitCode = $commandTester->execute([
+            'email' => $email,
+            'password' => 'validpassword123',
         ]);
 
         $this->assertEquals(1, $exitCode);
-        $this->assertStringContainsString('User with email "nonexistent@example.com" not found.', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('User with email "nonexistent@example.com" not found', $commandTester->getDisplay());
     }
 
-    public function testExecuteHandlesUserWithExistingMustChangePasswordFalse(): void
+    public function testCommandHasCorrectNameAndDescription(): void
     {
-        $user = new User();
-        $user->setEmail('test@example.com');
-        $user->setMustChangePassword(false);
+        $this->assertEquals('security:reset-user-passwd', $this->command->getName());
+        $this->assertEquals('Reset user password by email address', $this->command->getDescription());
+    }
 
-        $this->userRepository
-            ->method('findOneBy')
-            ->with(['email' => 'test@example.com'])
-            ->willReturn($user);
+    public function testCommandHasRequiredArguments(): void
+    {
+        $commandTester = new CommandTester($this->command);
 
-        $this->passwordHasher
-            ->expects($this->once())
-            ->method('hashPassword')
-            ->with($user, 'newpassword123')
-            ->willReturn('hashed_new_password');
+        // Try to execute without arguments - this should throw an exception
+        $this->expectException(\Symfony\Component\Console\Exception\RuntimeException::class);
+        $this->expectExceptionMessage('Not enough arguments');
 
-        $this->entityManager
-            ->expects($this->once())
-            ->method('flush');
-
-        $exitCode = $this->commandTester->execute([
-            'email' => 'test@example.com',
-            'password' => 'newpassword123',
-        ]);
-
-        $this->assertEquals(0, $exitCode);
-        // Verify mustChangePassword remains false
-        $this->assertFalse($user->isMustChangePassword());
+        $commandTester->execute([]);
     }
 }

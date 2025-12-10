@@ -26,6 +26,10 @@ jobs:
       - name: Configure test environment
         run: |
           echo "ENABLE_PCOV=1" >> .env
+          echo "APP_DEBUG=0" >> .env
+          echo "COMPOSER_CONFIG_HOME=/tmp/composer" >> .env
+        env:
+          APP_DEBUG: 0
 
       - name: Install PHP dependencies
         run: composer install --no-scripts
@@ -36,9 +40,19 @@ jobs:
       - name: Run tests with coverage
         run: vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml
 
+      - name: Debug coverage
+        run: |
+          echo "Coverage file exists: $([ -f var/coverage/clover.xml ] && echo 'YES' || echo 'NO')"
+          if [ -f var/coverage/clover.xml ]; then
+            echo "Coverage stats:"
+            grep -oP 'files="\K[^"]*' var/coverage/clover.xml
+            grep -oP 'statements="\K[^"]*' var/coverage/clover.xml | tail -1
+            grep -oP 'coveredstatements="\K[^"]*' var/coverage/clover.xml | tail -1
+          fi
+
       - name: Check code coverage
         uses: johanvanhelden/gha-clover-test-coverage-check@v1
         with:
-          percentage: 22
+          percentage: 66
           filename: var/coverage/clover.xml
-  
+
