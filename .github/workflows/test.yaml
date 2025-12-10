@@ -26,6 +26,15 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-scripts
 
-      - name: Run tests
-        run: vendor/bin/phpunit --stderr --colors=never
+      - name: Create coverage directory
+        run: mkdir -p var/coverage
+
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --stderr --colors=never --coverage-clover=var/coverage/clover.xml
+
+      - name: Check code coverage
+        uses: johanvanhelden/gha-clover-test-coverage-check@v1
+        with:
+          percentage: 85
+          filename: var/coverage/clover.xml
   
