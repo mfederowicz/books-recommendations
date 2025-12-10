@@ -27,7 +27,7 @@ jobs:
           fi
 
       - name: Install PHP dependencies
-        run: composer install
+        run: composer install --no-scripts
 
       - name: Run linter
         run: vendor/bin/php-cs-fixer fix --dry-run --diff
