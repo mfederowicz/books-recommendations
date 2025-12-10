@@ -52,7 +52,7 @@ class TestQdrantCommandTest extends TestCase
         $this->qdrantClient
             ->expects($this->once())
             ->method('upsertPoints')
-            ->with('ebooks', $this->isType('array'))
+            ->with('ebooks', $this->isArray())
             ->willReturn(true);
 
         // Mock search
@@ -66,7 +66,7 @@ class TestQdrantCommandTest extends TestCase
         $this->qdrantClient
             ->expects($this->once())
             ->method('search')
-            ->with('ebooks', $this->isType('array'), 3)
+            ->with('ebooks', $this->isArray(), 3)
             ->willReturn($searchResults);
 
         $exitCode = $commandTester->execute([]);
@@ -138,13 +138,13 @@ class TestQdrantCommandTest extends TestCase
         $this->qdrantClient
             ->expects($this->once())
             ->method('upsertPoints')
-            ->with($customCollection, $this->isType('array'))
+            ->with($customCollection, $this->isArray())
             ->willReturn(true);
 
         $this->qdrantClient
             ->expects($this->once())
             ->method('search')
-            ->with($customCollection, $this->isType('array'), 3)
+            ->with($customCollection, $this->isArray(), 3)
             ->willReturn([]);
 
         $exitCode = $commandTester->execute(['--collection' => $customCollection]);
