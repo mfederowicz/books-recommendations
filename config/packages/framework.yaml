@@ -9,6 +9,10 @@ framework:
     session:
         cookie_lifetime: 43200  # 12 hours in seconds
         gc_maxlifetime: 43200   # session lifetime on server
+        cookie_secure: auto     # Use HTTPS when available
+        cookie_samesite: lax    # Allow cookies from same site and top-level navigation
+        cookie_path: /
+        use_cookies: true
 
     #esi: true
     #fragments: true
@@ -18,6 +22,12 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+
+when@prod:
+    framework:
+        session:
+            cookie_secure: true   # Force HTTPS cookies in production
+            cookie_httponly: true # Prevent JavaScript access to session cookies
 
 when@dev:
     framework:

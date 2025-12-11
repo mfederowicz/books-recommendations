@@ -24,7 +24,7 @@ final class DefaultController extends AbstractController
             // Logged in user - show dashboard
             return $this->render('dashboard.html.twig');
         } else {
-            error_log("No authenticated user - showing homepage");
+            error_log("No authenticated user - showing homepage. Session ID: " . $this->get('request_stack')->getCurrentRequest()->getSession()->getId());
             // Not logged in - show landing page
             return $this->render('homepage.html.twig');
         }
@@ -36,6 +36,25 @@ final class DefaultController extends AbstractController
     public function wellKnown(): Response
     {
         return new Response('', 404);
+    }
+
+    #[Route('/debug/session-test', name: 'debug_session_test', methods: ['GET'])]
+    public function debugSessionTest(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->set('test_key', 'test_value_' . time());
+        $session->set('test_timestamp', time());
+
+        return $this->json([
+            'session_id' => $session->getId(),
+            'session_started' => true,
+            'test_key_set' => $session->get('test_key'),
+            'timestamp' => $session->get('test_timestamp'),
+            'all_keys' => array_keys($session->all()),
+            'cookies' => $request->cookies->all(),
+            'server_https' => $request->server->get('HTTPS'),
+            'server_ssl' => $request->server->get('SSL_TLS_SNI'),
+        ]);
     }
 
     public function debugAuth(Request $request): Response
