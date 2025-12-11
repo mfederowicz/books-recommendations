@@ -6,7 +6,6 @@ namespace App\Tests\phpunit\Unit\Command;
 
 use App\Command\CleanEbooksDataCommand;
 use App\Entity\Tag;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
