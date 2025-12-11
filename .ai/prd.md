@@ -67,10 +67,13 @@ Użytkownik często zmaga się z trudnością wyboru książki, która odpowiada
 
 ### US-006: Wyświetlanie rekomendacji
 - **Tytuł:** Prezentacja rekomendacji książkowych
-- **Opis:** Po wprowadzeniu opisu książki, użytkownik otrzymuje listę rekomendacji zawierającą tytuł, autora, skrócony opis oraz grafikę okładki książki. Wyniki są paginowane, gdy ich liczba przekracza 10 pozycji.
+- **Opis:** Użytkownik może przeglądać swoje rekomendacje w formie listy zawierającej krótki opis, datę aktualizacji oraz liczbę znalezionych książek. Kliknięcie na rekord tabelki otwiera modal z listą znalezionych książek zawierającą grafikę okładki, tytuł, autora oraz listę tagów przypisanych do książki.
 - **Kryteria akceptacji:**
-  - System wyświetla wyniki w czytelnej formie.
-  - Użytkownik może przechodzić między stronami wyników.
+  - System wyświetla listę rekomendacji w czytelnej formie tabelarycznej.
+  - Każdy rekord zawiera: krótki opis, datę aktualizacji, liczbę znalezionych książek.
+  - Data aktualizacji zmienia się gdy system znajdzie nowe pasujące książki.
+  - Kliknięcie na rekord otwiera modal z szczegółami znalezionych książek.
+  - Modal zawiera dla każdej książki: grafikę okładki, tytuł, autora, listę tagów.
   - Rekomendacje mogą być wyświetlane tylko po zalogowaniu (US-002)
 
 ### US-007: Usuwanie rekomendacji książkowej użytkownika

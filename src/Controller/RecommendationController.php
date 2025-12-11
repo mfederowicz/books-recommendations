@@ -62,6 +62,14 @@ final class RecommendationController extends AbstractController
                 array_map(fn ($tag) => $tag->getId(), $tags)
             );
 
+            // Search for similar books and store results
+            try {
+                $this->recommendationService->searchAndStoreSimilarEbooks($recommendation);
+            } catch (\Exception $e) {
+                // Log error but don't fail the recommendation creation
+                // Search can be retried later if needed
+            }
+
             // Return success - HTMX can handle this
             return $this->render('components/recommendation_success.html.twig', [
                 'recommendation' => $recommendation,

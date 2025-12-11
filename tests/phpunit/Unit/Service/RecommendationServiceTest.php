@@ -82,14 +82,23 @@ class RecommendationServiceTest extends TestCase
 
         // Mock that recommendation doesn't exist
         $recommendationRepo = $this->createMock(EntityRepository::class);
+        $recommendationResultRepo = $this->createMock(EntityRepository::class);
+        $ebookRepo = $this->createMock(EntityRepository::class);
+
         $this->entityManager
             ->method('getRepository')
-            ->willReturnCallback(function ($class) use ($recommendationRepo, $recommendationEmbeddingRepo) {
+            ->willReturnCallback(function ($class) use ($recommendationRepo, $recommendationEmbeddingRepo, $recommendationResultRepo, $ebookRepo) {
                 if (Recommendation::class === $class) {
                     return $recommendationRepo;
                 }
                 if (RecommendationEmbedding::class === $class) {
                     return $recommendationEmbeddingRepo;
+                }
+                if (\App\Entity\RecommendationResult::class === $class) {
+                    return $recommendationResultRepo;
+                }
+                if (\App\Entity\Ebook::class === $class) {
+                    return $ebookRepo;
                 }
 
                 return $this->createMock(EntityRepository::class);
@@ -173,14 +182,23 @@ class RecommendationServiceTest extends TestCase
         // Mock that recommendation exists
         $existingRecommendation = $this->createMock(Recommendation::class);
         $recommendationRepo = $this->createMock(EntityRepository::class);
+        $recommendationResultRepo = $this->createMock(EntityRepository::class);
+        $ebookRepo = $this->createMock(EntityRepository::class);
+
         $this->entityManager
             ->method('getRepository')
-            ->willReturnCallback(function ($class) use ($recommendationRepo, $recommendationEmbeddingRepo) {
+            ->willReturnCallback(function ($class) use ($recommendationRepo, $recommendationEmbeddingRepo, $recommendationResultRepo, $ebookRepo) {
                 if (Recommendation::class === $class) {
                     return $recommendationRepo;
                 }
                 if (RecommendationEmbedding::class === $class) {
                     return $recommendationEmbeddingRepo;
+                }
+                if (\App\Entity\RecommendationResult::class === $class) {
+                    return $recommendationResultRepo;
+                }
+                if (\App\Entity\Ebook::class === $class) {
+                    return $ebookRepo;
                 }
 
                 return $this->createMock(EntityRepository::class);
