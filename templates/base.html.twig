@@ -27,6 +27,16 @@
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <!-- DEBUG: Show auth status -->
+                    <div class="text-xs text-red-600 bg-red-100 px-2 py-1 rounded mr-2">
+                        DEBUG: User: {{ app.user ? app.user.email : 'null' }} |
+                        Token: {{ app.security.token ? 'exists' : 'null' }} |
+                        Auth: {{ is_granted('IS_AUTHENTICATED_FULLY') ? 'yes' : 'no' }}
+                    </div>
+                    <!-- Debug endpoint link -->
+                    <a href="{{ path('debug_auth') }}" class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded mr-2" target="_blank">
+                        🔍 DEBUG AUTH
+                    </a>
                     {% if app.user %}
                         <!-- Zalogowany użytkownik -->
                         <span class="text-gray-700 px-3 py-2 text-sm">
