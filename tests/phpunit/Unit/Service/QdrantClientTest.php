@@ -41,10 +41,10 @@ class QdrantClientTest extends TestCase
         $client = new QdrantClient();
 
         // Restore environment variables
-        if ($originalHost !== null) {
+        if (null !== $originalHost) {
             putenv("QDRANT_HOST=$originalHost");
         }
-        if ($originalPort !== null) {
+        if (null !== $originalPort) {
             putenv("QDRANT_PORT=$originalPort");
         }
 
@@ -105,10 +105,10 @@ class QdrantClientTest extends TestCase
         $client = new QdrantClient();
 
         // Restore environment variables
-        if ($originalHost !== null) {
+        if (null !== $originalHost) {
             putenv("QDRANT_HOST=$originalHost");
         }
-        if ($originalPort !== null) {
+        if (null !== $originalPort) {
             putenv("QDRANT_PORT=$originalPort");
         }
 
