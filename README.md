@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mfederowicz/books-recommender/workflows/Test/badge.svg)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ATest)
 [![Lint](https://github.com/mfederowicz/books-recommender/workflows/Lint/badge.svg)](https://github.com/mfederowicz/books-recommender/actions?query=workflow%3ALint)
-[![Test Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/mfederowicz/books-recommender/actions)
+[![Test Coverage](https://img.shields.io/badge/coverage-56%25-yellow)](https://github.com/mfederowicz/books-recommender/actions)
 
 Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystująca embeddings OpenAI do dopasowania preferencji użytkowników.
 
@@ -25,6 +25,7 @@ Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystują
 - ✅ Wyświetlanie rekomendacji książek
 
 ### Dla administratorów:
+- ✅ Komenda do czyszczenia danych książek przed embeddingami: `app:clean:ebooks-data`
 - ✅ Komenda do przetwarzania wsadowego embeddingów książek: `app:process:ebook-embeddings`
 - ✅ Migracja embeddingów książek do Qdrant: `app:migrate:ebook-embeddings-to-qdrant`
 - ✅ Testowanie funkcjonalności Qdrant: `app:test:qdrant`
@@ -80,9 +81,10 @@ composer install
 - **users** - Użytkownicy systemu
 - **recommendations** - Rekomendacje użytkowników
 - **recommendations_embeddings** - Embeddings OpenAI dla rekomendacji użytkowników
-- **ebooks** - Katalog książek z metadanymi
-- **ebooks_embeddings** - Kopia embeddingów książek (synchronizacja z Qdrant)
+- **ebooks** - Katalog książek z metadanymi (ISBN VARCHAR(13), main_description, tags)
+- **ebooks_embeddings** - Embeddings książek z payload (ebook_id jako ISBN, payload_description)
 - **tags** - Tagi kategorii książek
+- **recommendations_tags** - Relacja wiele-do-wielu między rekomendacjami a tagami
 
 #### Qdrant (baza wektorowa):
 - **ebooks** - Kolekcja embeddingów książek dla szybkiego wyszukiwania wektorowego
@@ -123,7 +125,23 @@ composer install
 ./bin/run.sh ./bin/console app:test:qdrant --create-test-data
 
 # Pokrycie kodu testami
-./bin/run.sh ./bin/phpunit --coverage-html=var/coverage
+./bin/run.sh ./bin/phpunit --coverage-html=var/coverage-html
+
+# Raport pokrycia w konsoli
+./bin/run.sh ./bin/phpunit --coverage-text
+```
+
+
+### Przygotowanie danych do embeddingów:
+```bash
+# Czyszczenie danych książek przed przetwarzaniem embeddingów
+./bin/run.sh ./bin/console app:clean:ebooks-data --batch-size=10
+
+# Czyszczenie z limitem iteracji
+./bin/run.sh ./bin/console app:clean:ebooks-data --batch-size=10 --max-iterations=50
+
+# Czyszczenie w trybie suchej próby
+./bin/run.sh ./bin/console app:clean:ebooks-data --dry-run
 ```
 
 ### Migracja danych:
@@ -134,6 +152,23 @@ composer install
 # Sprawdź statystyki kolekcji w Qdrant
 ./bin/run.sh ./bin/console app:migrate:ebook-embeddings-to-qdrant --stats-only
 ```
+
+## 🆕 Najnowsze zmiany (v2.0)
+
+### Wydajność i bezpieczeństwo:
+- ✅ **Inteligentne przetwarzanie wsadowe** - komenda `app:clean:ebooks-data` przetwarza książki w małych paczkach z automatycznym zarządzaniem błędami
+- ✅ **Mechanizm bezpieczeństwa** - automatyczne przerwanie przetwarzania przy systematycznych błędach
+- ✅ **Optymalizacja pamięci** - EntityManager jest czyszczony po każdej iteracji
+
+### Usprawnienia struktury danych:
+- ✅ **ISBN jako identyfikator** - książki identyfikowane przez 13-cyfrowy kod ISBN zamiast ID
+- ✅ **Bogatsze metadane** - dodano pola `main_description` i `tags` do tabeli ebooks
+- ✅ **Payload rozszerzony** - dodano `payload_description` do embeddingów książek
+
+### Architektura:
+- ✅ **Lepsze zarządzanie embeddingami** - synchronizacja między MySQL i Qdrant po ISBN
+- ✅ **Bezpieczeństwo transakcji** - obsługa błędów bez przerywania całego procesu
+- ✅ **Code coverage:** 56% z 94 testami i 433 asercjami
 
 ## 🤝 Współtworzenie
 
