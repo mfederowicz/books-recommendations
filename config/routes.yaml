@@ -27,6 +27,12 @@ api_tags_search:
     controller: App\Controller\ApiController::searchTags
     methods: [GET]
 
+# Test endpoint for Qdrant search
+api_test_qdrant_search:
+    path: /api/test/qdrant-search
+    controller: App\Controller\ApiController::testQdrantSearch
+    methods: [GET]
+
 # Recommendation routes
 app_recommendations_create:
     path: /recommendations

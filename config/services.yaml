@@ -40,3 +40,5 @@ services:
 
     App\Service\EbookEmbeddingService:
         autowire: true
+
+    App\Service\RecommendationService: ~

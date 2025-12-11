@@ -28,6 +28,9 @@ class Ebook
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $offersCount = 0;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $hasEmbedding = false;
+
     #[ORM\Column(type: 'string', length: 512, nullable: true)]
     private ?string $comparisonLink = null;
 
@@ -98,6 +101,18 @@ class Ebook
     public function setOffersCount(int $offersCount): self
     {
         $this->offersCount = $offersCount;
+
+        return $this;
+    }
+
+    public function hasEmbedding(): bool
+    {
+        return $this->hasEmbedding;
+    }
+
+    public function setHasEmbedding(bool $hasEmbedding): self
+    {
+        $this->hasEmbedding = $hasEmbedding;
 
         return $this;
     }

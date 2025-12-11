@@ -34,6 +34,12 @@ class EbookEmbedding
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $payloadDescription = null;
 
+    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    private ?string $payloadUuid = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $syncedToQdrant = false;
+
     #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private \DateTimeInterface $createdAt;
 
@@ -115,6 +121,30 @@ class EbookEmbedding
     public function setPayloadDescription(?string $payloadDescription): self
     {
         $this->payloadDescription = $payloadDescription;
+
+        return $this;
+    }
+
+    public function getPayloadUuid(): ?string
+    {
+        return $this->payloadUuid;
+    }
+
+    public function setPayloadUuid(?string $payloadUuid): self
+    {
+        $this->payloadUuid = $payloadUuid;
+
+        return $this;
+    }
+
+    public function isSyncedToQdrant(): bool
+    {
+        return $this->syncedToQdrant;
+    }
+
+    public function setSyncedToQdrant(bool $syncedToQdrant): self
+    {
+        $this->syncedToQdrant = $syncedToQdrant;
 
         return $this;
     }

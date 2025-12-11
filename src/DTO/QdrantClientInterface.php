@@ -15,6 +15,11 @@ interface QdrantClientInterface
     public function createCollection(string $collectionName, int $vectorSize): bool;
 
     /**
+     * Create a collection with named vectors.
+     */
+    public function createCollectionWithNamedVectors(string $collectionName, array $namedVectors): bool;
+
+    /**
      * Insert or update a point (vector) in the collection.
      */
     public function upsertPoint(string $collectionName, array $vector, string $id, array $payload = []): bool;
@@ -28,6 +33,11 @@ interface QdrantClientInterface
      * Search for similar vectors.
      */
     public function search(string $collectionName, array $vector, int $limit = 10, array $filter = []): array;
+
+    /**
+     * Search for similar vectors using named vector.
+     */
+    public function searchWithNamedVector(string $collectionName, string $vectorName, array $vector, int $limit = 10, array $filter = []): array;
 
     /**
      * Delete a point by ID.

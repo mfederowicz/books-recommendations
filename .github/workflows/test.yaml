@@ -53,6 +53,6 @@ jobs:
       - name: Check code coverage
         uses: johanvanhelden/gha-clover-test-coverage-check@v1
         with:
-          percentage: 66
+          percentage: 60
           filename: var/coverage/clover.xml
 

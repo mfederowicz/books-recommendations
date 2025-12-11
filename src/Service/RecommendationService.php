@@ -77,8 +77,8 @@ final class RecommendationService implements RecommendationServiceInterface
      */
     public function findSimilarEbooks(string $text, int $limit = 10): array
     {
-        // Get embedding for user recommendation text
-        $queryEmbedding = $this->openAIEmbeddingClient->getEmbedding($text);
+        // Get embedding for user recommendation text (with caching)
+        $queryEmbedding = $this->getOrCreateQueryEmbedding($text);
 
         // Search for similar books in Qdrant using user embedding
         return $this->ebookEmbeddingService->findSimilarEbooks($queryEmbedding, $limit);
@@ -147,5 +147,45 @@ final class RecommendationService implements RecommendationServiceInterface
 
         $this->entityManager->persist($recommendationEmbedding);
         $this->entityManager->flush();
+    }
+
+    /**
+     * Get Qdrant collection statistics.
+     */
+    public function getQdrantStats(): ?array
+    {
+        return $this->ebookEmbeddingService->getQdrantCollectionStats();
+    }
+
+    /**
+     * Get embedding for query text, creating it if it doesn't exist.
+     * This helps avoid redundant OpenAI API calls.
+     */
+    private function getOrCreateQueryEmbedding(string $text): array
+    {
+        $normalizedText = $this->textNormalizationService->normalizeText($text);
+        $hash = $this->textNormalizationService->generateHash($normalizedText);
+
+        $existingEmbedding = $this->entityManager
+            ->getRepository(RecommendationEmbedding::class)
+            ->findOneBy(['normalizedTextHash' => $hash]);
+
+        if (null !== $existingEmbedding) {
+            return $existingEmbedding->getEmbedding();
+        }
+
+        // Generate new embedding from OpenAI
+        $embedding = $this->openAIEmbeddingClient->getEmbedding($text);
+
+        // Save embedding to database for future use
+        $recommendationEmbedding = new RecommendationEmbedding();
+        $recommendationEmbedding->setNormalizedTextHash($hash);
+        $recommendationEmbedding->setDescription($text);
+        $recommendationEmbedding->setEmbedding($embedding);
+
+        $this->entityManager->persist($recommendationEmbedding);
+        $this->entityManager->flush();
+
+        return $embedding;
     }
 }

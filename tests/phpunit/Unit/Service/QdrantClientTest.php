@@ -14,7 +14,7 @@ class QdrantClientTest extends TestCase
     protected function setUp(): void
     {
         // Set required environment variables
-        putenv('QDRANT_HOST=localhost');
+        putenv('QDRANT_HOST=qdrant');
         putenv('QDRANT_PORT=6333');
 
         $this->client = new QdrantClient();
@@ -40,7 +40,7 @@ class QdrantClientTest extends TestCase
         $hostProperty->setAccessible(true);
         $portProperty->setAccessible(true);
 
-        $this->assertEquals('localhost', $hostProperty->getValue($client));
+        $this->assertEquals('qdrant', $hostProperty->getValue($client));
         $this->assertEquals(6333, $portProperty->getValue($client));
     }
 
@@ -53,7 +53,7 @@ class QdrantClientTest extends TestCase
         $hostProperty->setAccessible(true);
         $portProperty->setAccessible(true);
 
-        $this->assertEquals('localhost', $hostProperty->getValue($this->client));
+        $this->assertEquals('qdrant', $hostProperty->getValue($this->client));
         $this->assertEquals(6333, $portProperty->getValue($this->client));
     }
 
@@ -89,7 +89,7 @@ class QdrantClientTest extends TestCase
         $hostProperty->setAccessible(true);
         $portProperty->setAccessible(true);
 
-        $this->assertEquals('localhost', $hostProperty->getValue($client));
+        $this->assertEquals('qdrant', $hostProperty->getValue($client));
         $this->assertEquals(6333, $portProperty->getValue($client));
     }
 

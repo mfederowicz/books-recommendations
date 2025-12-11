@@ -6,18 +6,21 @@ namespace App\Tests\Unit\Command;
 
 use App\Command\MigrateEbookEmbeddingsToQdrantCommand;
 use App\Service\EbookEmbeddingService;
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
 {
     private EbookEmbeddingService $ebookEmbeddingService;
+    private EntityManagerInterface $entityManager;
     private MigrateEbookEmbeddingsToQdrantCommand $command;
 
     protected function setUp(): void
     {
         $this->ebookEmbeddingService = $this->createMock(EbookEmbeddingService::class);
-        $this->command = new MigrateEbookEmbeddingsToQdrantCommand($this->ebookEmbeddingService);
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->command = new MigrateEbookEmbeddingsToQdrantCommand($this->ebookEmbeddingService, $this->entityManager);
     }
 
     public function testExecuteStatsOnlySuccess(): void
@@ -26,10 +29,15 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
 
         $stats = [
             'result' => [
-                'name' => 'ebooks',
-                'vectors' => [
-                    'size' => 1536,
-                    'distance' => 'Cosine',
+                'config' => [
+                    'params' => [
+                        'vectors' => [
+                            'book_vector' => [
+                                'size' => 1536,
+                                'distance' => 'Cosine',
+                            ],
+                        ],
+                    ],
                 ],
                 'points_count' => 100,
                 'status' => 'green',
@@ -40,6 +48,19 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
             ->expects($this->once())
             ->method('getQdrantCollectionStats')
             ->willReturn($stats);
+
+        // Mock repository calls for stats
+        $repository = $this->createMock(\Doctrine\ORM\EntityRepository::class);
+        $this->entityManager
+            ->expects($this->exactly(2))
+            ->method('getRepository')
+            ->with(\App\Entity\EbookEmbedding::class)
+            ->willReturn($repository);
+
+        $repository
+            ->expects($this->exactly(2))
+            ->method('count')
+            ->willReturnOnConsecutiveCalls(200, 100); // total and synced
 
         $exitCode = $commandTester->execute(['--stats-only' => true]);
 
@@ -71,12 +92,25 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
     {
         $commandTester = new CommandTester($this->command);
 
+        // Mock repository calls for stats
+        $repository = $this->createMock(\Doctrine\ORM\EntityRepository::class);
+        $this->entityManager
+            ->expects($this->exactly(2))
+            ->method('getRepository')
+            ->with(\App\Entity\EbookEmbedding::class)
+            ->willReturn($repository);
+
+        $repository
+            ->expects($this->exactly(2))
+            ->method('count')
+            ->willReturnOnConsecutiveCalls(100, 0); // total and synced
+
         $exitCode = $commandTester->execute(['--dry-run' => true]);
 
         $this->assertEquals(0, $exitCode);
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString('DRY RUN MODE', $output);
-        $this->assertStringContainsString('This would migrate all ebook embeddings to Qdrant', $output);
+        $this->assertStringContainsString('Would sync 100 unsynchronized embeddings', $output);
     }
 
     public function testExecuteMigrationSuccess(): void
@@ -98,7 +132,7 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
 
         $this->ebookEmbeddingService
             ->expects($this->once())
-            ->method('syncAllEbookEmbeddingsToQdrant')
+            ->method('syncUnsyncedEbookEmbeddingsToQdrant')
             ->willReturn($migrationResult);
 
         $this->ebookEmbeddingService
@@ -111,7 +145,7 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
         $this->assertEquals(0, $exitCode);
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString('Migration completed!', $output);
-        $this->assertStringContainsString('Total ebook embeddings', $output);
+        $this->assertStringContainsString('Total Unsynced ebook embeddings', $output);
         $this->assertStringContainsString('48', $output); // synced count
         $this->assertStringContainsString('2', $output);  // errors count
     }
@@ -122,7 +156,7 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
 
         $this->ebookEmbeddingService
             ->expects($this->once())
-            ->method('syncAllEbookEmbeddingsToQdrant')
+            ->method('syncUnsyncedEbookEmbeddingsToQdrant')
             ->willThrowException(new \Exception('Database connection failed'));
 
         $exitCode = $commandTester->execute([]);
@@ -144,7 +178,7 @@ class MigrateEbookEmbeddingsToQdrantCommandTest extends TestCase
 
         $this->ebookEmbeddingService
             ->expects($this->once())
-            ->method('syncAllEbookEmbeddingsToQdrant')
+            ->method('syncUnsyncedEbookEmbeddingsToQdrant')
             ->willReturn($migrationResult);
 
         $this->ebookEmbeddingService
