@@ -24,34 +24,21 @@
             </dl>
         </div>
 
-        <!-- Token Information -->
-        <div class="border rounded p-4">
-            <h2 class="text-lg font-semibold mb-3 text-green-600">🎫 Security Token</h2>
-            <dl class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <dt class="font-medium">Token exists:</dt>
-                <dd class="font-mono text-sm {{ debug.token_exists ? 'text-green-600' : 'text-red-600' }}">
-                    {{ debug.token_exists ? 'YES' : 'NO' }}
-                </dd>
-
-                <dt class="font-medium">Token class:</dt>
-                <dd class="font-mono text-sm">{{ debug.token_class ?: 'null' }}</dd>
-
-                <dt class="font-medium">Token user:</dt>
-                <dd class="font-mono text-sm">{{ debug.token_user ?: 'null' }}</dd>
-            </dl>
-        </div>
-
         <!-- Session Information -->
         <div class="border rounded p-4">
             <h2 class="text-lg font-semibold mb-3 text-purple-600">💾 Session Data</h2>
             <dl class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
                 <dt class="font-medium">Session ID:</dt>
                 <dd class="font-mono text-sm">{{ debug.session_id }}</dd>
-            </dl>
 
-            <h3 class="font-medium mb-2">Session Contents:</h3>
-            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">{{ debug.session_data|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                <dt class="font-medium">Session keys count:</dt>
+                <dd class="font-mono text-sm">{{ debug.session_count }}</dd>
+
+                <dt class="font-medium">Session keys:</dt>
+                <dd class="font-mono text-sm">{{ debug.session_keys|join(', ') }}</dd>
+            </dl>
         </div>
+
 
         <!-- Request Information -->
         <div class="border rounded p-4">
@@ -60,11 +47,8 @@
             <h3 class="font-medium mb-2">Server Variables:</h3>
             <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mb-4">{{ debug.server_vars|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
 
-            <h3 class="font-medium mb-2">Headers:</h3>
-            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mb-4">{{ debug.headers|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-
             <h3 class="font-medium mb-2">Cookies:</h3>
-            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">{{ debug.cookies|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            <p class="text-sm mb-2">Has cookies: <span class="{{ debug.has_cookies ? 'text-green-600' : 'text-red-600' }}">{{ debug.has_cookies ? 'YES' : 'NO' }}</span> ({{ debug.cookie_count }} total)</p>
         </div>
     </div>
 

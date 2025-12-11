@@ -65,3 +65,9 @@ well_known:
     requirements:
         path: ".+"
     methods: [GET, HEAD]
+
+# Debug route for authentication issues
+debug_auth:
+    path: /debug/auth
+    controller: App\Controller\DefaultController::debugAuth
+    methods: [GET]
