@@ -216,8 +216,34 @@ function handleFormResponse(event) {
   submitBtn.disabled = false;
 
   if (xhr.status === 200) {
+    // Sprawdź czy odpowiedź zawiera komunikat o usunięciu - jeśli tak, nie pokazuj komunikatu o dodaniu
+    const responseText = xhr.responseText || '';
+    if (responseText.includes('recommendation_deleted') || responseText.includes('Rekomendacja została usunięta')) {
+      // To jest odpowiedź z usunięcia - nie pokazuj dodatkowego komunikatu
+      return;
+    }
+
     // Sukces - wyczyść formularz
     clearForm();
+
+    // Automatycznie przełącz na zakładkę "Moje rekomendacje" i odśwież listę
+    setTimeout(() => {
+      showTab('my-recommendations');
+      htmx.ajax('GET', '/recommendations/list', {
+        target: '#recommendations-container',
+        swap: 'innerHTML'
+      });
+
+      // Pokaż komunikat sukcesu
+      const messagesDiv = document.getElementById('global-messages');
+      if (messagesDiv) {
+        messagesDiv.innerHTML = '<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">Rekomendacja została dodana pomyślnie!</div>';
+        // Ukryj komunikat po 3 sekundach
+        setTimeout(() => {
+          messagesDiv.innerHTML = '';
+        }, 3000);
+      }
+    }, 500); // Krótkie opóźnienie dla płynniejszego UX
   }
   // Błąd będzie wyświetlony w #global-messages przez HTMX
 }

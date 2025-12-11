@@ -50,6 +50,7 @@
           <button
             class="text-red-600 hover:text-red-800 text-sm font-medium delete-recommendation-btn"
             data-recommendation-id="{{ recommendation.id }}"
+            type="button"
           >
             {{ 'dashboard.delete'|trans }}
           </button>
@@ -116,6 +117,7 @@ function closeRecommendationModal() {
 function deleteRecommendation(recommendationId) {
   // Zapobiegaj domyślnym akcjom (może być wywołane z onclick)
   if (window.event) {
+    window.event.preventDefault();
     window.event.stopPropagation();
   }
 
@@ -137,18 +139,32 @@ function deleteRecommendation(recommendationId) {
       target: '#recommendations-container',
       swap: 'innerHTML'
     });
+
+    // Jeśli usunięto ostatnią rekomendację, przełącz na zakładkę dodawania
+    setTimeout(() => {
+      const recommendationsContainer = document.getElementById('recommendations-container');
+      if (recommendationsContainer && recommendationsContainer.innerHTML.includes('no_recommendations')) {
+        showTab('add-recommendation');
+      }
+    }, 100);
   });
 }
 
 // Event listeners dla przycisków i div'ów
 document.addEventListener('click', function(e) {
-  // Obsługa kliknięć na wiersze rekomendacji
-  if (e.target.closest('.recommendation-row')) {
-    const row = e.target.closest('.recommendation-row');
-    const recommendationId = row.getAttribute('data-recommendation-id');
-    if (recommendationId) {
-      openRecommendationModal(recommendationId);
+  // Obsługa przycisków usunięcia (sprawdź najpierw, bo ma najwyższy priorytet)
+  if (e.target.closest('.delete-recommendation-btn')) {
+    e.preventDefault(); // Zapobiegaj domyślnej akcji
+    e.stopPropagation(); // Zapobiegaj wywołaniu innych event listenerów
+    const btn = e.target.closest('.delete-recommendation-btn');
+    const recommendationId = btn.getAttribute('data-recommendation-id');
+    if (recommendationId && !btn.disabled) { // Zapobiegaj wielokrotnemu wywołaniu
+      btn.disabled = true; // Wyłącz przycisk tymczasowo
+      deleteRecommendation(recommendationId);
+      // Przywróć przycisk po krótkim czasie (na wypadek błędu)
+      setTimeout(() => { btn.disabled = false; }, 1000);
     }
+    return false; // Zatrzymaj dalsze przetwarzanie i domyślną akcję
   }
 
   // Obsługa przycisków "Pokaż książki"
@@ -156,18 +172,21 @@ document.addEventListener('click', function(e) {
     e.stopPropagation(); // Zapobiegaj wywołaniu event listener dla wiersza
     const btn = e.target.closest('.show-books-btn');
     const recommendationId = btn.getAttribute('data-recommendation-id');
-    if (recommendationId) {
+    if (recommendationId && !btn.disabled) { // Zapobiegaj wielokrotnemu wywołaniu
+      btn.disabled = true; // Wyłącz przycisk tymczasowo
       openRecommendationModal(recommendationId);
+      // Przywróć przycisk po krótkim czasie
+      setTimeout(() => { btn.disabled = false; }, 1000);
     }
+    return; // Zatrzymaj dalsze przetwarzanie
   }
 
-  // Obsługa przycisków usunięcia
-  if (e.target.closest('.delete-recommendation-btn')) {
-    e.stopPropagation(); // Zapobiegaj wywołaniu innych event listenerów
-    const btn = e.target.closest('.delete-recommendation-btn');
-    const recommendationId = btn.getAttribute('data-recommendation-id');
+  // Obsługa kliknięć na wiersze rekomendacji (tylko jeśli nie kliknięto na przycisk)
+  if (e.target.closest('.recommendation-row')) {
+    const row = e.target.closest('.recommendation-row');
+    const recommendationId = row.getAttribute('data-recommendation-id');
     if (recommendationId) {
-      deleteRecommendation(recommendationId);
+      openRecommendationModal(recommendationId);
     }
   }
 });

@@ -157,6 +157,7 @@ final class RecommendationController extends AbstractController
 
             return $this->render('components/recommendation_success.html.twig', [
                 'message' => 'dashboard.recommendation_deleted',
+                'type' => 'delete',
             ]);
         } catch (\Exception $e) {
             return $this->render('components/recommendation_error.html.twig', [
