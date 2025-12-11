@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 final class DefaultController extends AbstractController
 {
-    public function __construct(
-        private RequestStack $requestStack,
-        private ?TokenStorageInterface $tokenStorage = null
-    ) {
+    public function __construct(private RequestStack $requestStack)
+    {
     }
 
     /**
@@ -24,20 +20,13 @@ final class DefaultController extends AbstractController
      */
     public function index(): Response
     {
-        $user = $this->getUser();
-
-        // Debug logging for production troubleshooting
-        if ($user) {
-            error_log("User authenticated: " . $user->getEmail() . " - showing dashboard");
+        if ($this->getUser()) {
             // Logged in user - show dashboard
             return $this->render('dashboard.html.twig');
-        } else {
-            $request = $this->requestStack->getCurrentRequest();
-            $sessionId = $request ? $request->getSession()->getId() : 'no-session';
-            error_log("No authenticated user - showing homepage. Session ID: " . $sessionId);
-            // Not logged in - show landing page
-            return $this->render('homepage.html.twig');
         }
+
+        // Not logged in - show landing page
+        return $this->render('homepage.html.twig');
     }
 
     /**
@@ -52,7 +41,7 @@ final class DefaultController extends AbstractController
     public function debugSessionTest(Request $request): Response
     {
         $session = $request->getSession();
-        $session->set('test_key', 'test_value_' . time());
+        $session->set('test_key', 'test_value_'.time());
         $session->set('test_timestamp', time());
 
         return $this->json([
@@ -78,12 +67,12 @@ final class DefaultController extends AbstractController
         $debug = [
             'user_from_getUser' => $user ? $user->getEmail() : null,
             'is_authenticated' => $this->isGranted('IS_AUTHENTICATED_FULLY'),
-            'token_exists' => $token !== null,
+            'token_exists' => null !== $token,
             'token_class' => $token ? get_class($token) : null,
             'session_id' => $session->getId(),
             'session_keys' => array_keys($session->all()),
             'session_count' => count($session->all()),
-            'session_attributes' => array_filter($session->all(), function($key) {
+            'session_attributes' => array_filter($session->all(), function ($key) {
                 return !str_starts_with($key, '_sf2'); // Filter out Symfony internal session keys
             }, ARRAY_FILTER_USE_KEY),
             'server_vars' => [

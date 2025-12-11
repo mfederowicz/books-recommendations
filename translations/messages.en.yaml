@@ -18,17 +18,19 @@ nav:
 # Authentication pages
 auth:
   login:
+    tab: "Login"
     heading: "Sign in to your account"
     description: "Access your personalized book recommendations"
     email_label: "Email address"
     email_placeholder: "Enter your email"
     password_label: "Password"
     password_placeholder: "Enter your password"
-    button: "Sign in"
+    submit: "Sign in"
     no_account: "Don't have an account?"
     register_link: "Register here"
 
   register:
+    tab: "Register"
     heading: "Create your account"
     description: "Join Books Recommender and discover your next favorite book"
     email_label: "Email address"
@@ -37,7 +39,7 @@ auth:
     password_placeholder: "Enter your password (min. 8 characters)"
     confirm_password_label: "Confirm Password"
     confirm_password_placeholder: "Confirm your password"
-    button: "Create Account"
+    submit: "Create Account"
     have_account: "Already have an account?"
     login_link: "Sign in here"
 
