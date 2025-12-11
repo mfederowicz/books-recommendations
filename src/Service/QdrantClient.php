@@ -8,6 +8,7 @@ use App\DTO\QdrantClientInterface;
 use Qdrant\Config;
 use Qdrant\Http\Builder;
 use Qdrant\Qdrant;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Qdrant vector database client implementation using hkulekci/qdrant library.
@@ -17,11 +18,13 @@ final class QdrantClient implements QdrantClientInterface
     private Qdrant $client;
     private string $host;
     private int $port;
+    private HttpClientInterface $httpClient;
 
-    public function __construct()
+    public function __construct(?HttpClientInterface $httpClient = null)
     {
         $this->host = $this->getEnvVar('QDRANT_HOST', 'localhost');
         $this->port = (int) $this->getEnvVar('QDRANT_PORT', '6333');
+        $this->httpClient = $httpClient ?? \Symfony\Component\HttpClient\HttpClient::create();
 
         $config = new Config($this->host, $this->port);
         $builder = new Builder();
@@ -72,7 +75,7 @@ final class QdrantClient implements QdrantClientInterface
             }
 
             // Use raw HTTP request to create collection with named vectors
-            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+            $httpClient = $this->httpClient;
 
             $response = $httpClient->request('PUT', "http://{$this->host}:{$this->port}/collections/{$collectionName}", [
                 'headers' => [
@@ -122,7 +125,7 @@ final class QdrantClient implements QdrantClientInterface
             }
 
             // Use HTTP client for upsert to handle named vectors properly
-            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+            $httpClient = $this->httpClient;
 
             $response = $httpClient->request('PUT', "http://{$this->host}:{$this->port}/collections/{$collectionName}/points", [
                 'headers' => [
@@ -192,7 +195,7 @@ final class QdrantClient implements QdrantClientInterface
                 $searchParams['filter'] = $filter;
             }
 
-            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+            $httpClient = $this->httpClient;
             $response = $httpClient->request('POST', "http://{$this->host}:{$this->port}/collections/{$collectionName}/points/search", [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -222,7 +225,6 @@ final class QdrantClient implements QdrantClientInterface
 
             return $results;
         } catch (\Exception $e) {
-            error_log('Qdrant search error: '.$e->getMessage());
             throw new \RuntimeException("Failed to search in collection '{$collectionName}' with named vector '{$vectorName}': ".$e->getMessage(), 0, $e);
         }
     }
@@ -257,7 +259,7 @@ final class QdrantClient implements QdrantClientInterface
     {
         try {
             // Use HTTP client for consistency
-            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+            $httpClient = $this->httpClient;
 
             $response = $httpClient->request('GET', "http://{$this->host}:{$this->port}/collections/{$collectionName}");
 

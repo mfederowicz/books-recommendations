@@ -6,20 +6,34 @@ namespace App\Service;
 
 use App\DTO\OpenAIEmbeddingClientInterface;
 use OpenAI;
+use OpenAI\Contracts\ClientContract;
 
 /**
  * OpenAI client for generating embeddings using the openai-php/client library.
  */
-final class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
+class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
 {
-    private OpenAI\Client $client;
+    private ClientContract $client;
     private string $model;
 
-    public function __construct()
+    public function __construct(?ClientContract $client = null)
     {
-        $apiKey = $this->getEnvVar('OPENAI_API_KEY');
-        $this->model = $this->getEnvVar('OPENAI_MODEL', 'text-embedding-3-small');
-        $this->client = \OpenAI::client($apiKey);
+        if (null === $client) {
+            $apiKey = $this->getEnvVar('OPENAI_API_KEY');
+            $this->model = $this->getEnvVar('OPENAI_MODEL', 'text-embedding-3-small');
+            $this->client = \OpenAI::client($apiKey);
+        } else {
+            $this->client = $client;
+            $this->model = 'text-embedding-3-small'; // Default for testing
+        }
+    }
+
+    /**
+     * Create embeddings using the OpenAI API (extracted for testing).
+     */
+    protected function createEmbeddings(array $params): object
+    {
+        return $this->client->embeddings()->create($params);
     }
 
     /**
@@ -57,7 +71,7 @@ final class OpenAIEmbeddingClient implements OpenAIEmbeddingClientInterface
         }
 
         try {
-            $response = $this->client->embeddings()->create([
+            $response = $this->createEmbeddings([
                 'model' => $this->model,
                 'input' => $texts,
                 'encoding_format' => 'float',

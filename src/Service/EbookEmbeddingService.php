@@ -9,6 +9,7 @@ use App\DTO\QdrantClientInterface;
 use App\Entity\Ebook;
 use App\Entity\EbookEmbedding;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Service for managing ebook embeddings in Qdrant vector database.
@@ -24,8 +25,16 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
      */
     private function generateUuid(): string
     {
+        return $this->generateUuidWithSymfonyCheck(class_exists(\Symfony\Component\Uid\Uuid::class));
+    }
+
+    /**
+     * Generate UUID with explicit Symfony availability check (for testing).
+     */
+    private function generateUuidWithSymfonyCheck(bool $symfonyAvailable): string
+    {
         // Use Symfony's Uuid if available, otherwise fallback to random
-        if (class_exists(\Symfony\Component\Uid\Uuid::class)) {
+        if ($symfonyAvailable) {
             return \Symfony\Component\Uid\Uuid::v4()->toRfc4122();
         }
 
@@ -42,6 +51,7 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
     public function __construct(
         private QdrantClientInterface $qdrantClient,
         private EntityManagerInterface $entityManager,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -225,7 +235,11 @@ class EbookEmbeddingService implements EbookEmbeddingServiceInterface
             } catch (\Exception $e) {
                 $errorCount += count($batch);
                 // Log error but continue with other batches
-                error_log('Failed to sync batch of '.count($batch).' ebook embeddings: '.$e->getMessage());
+                $this->logger->error('Failed to sync batch of {count} ebook embeddings: {error}', [
+                    'count' => count($batch),
+                    'error' => $e->getMessage(),
+                    'exception' => $e,
+                ]);
             }
         }
 
