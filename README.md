@@ -4,6 +4,7 @@
 
 Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystująca embeddings OpenAI do dopasowania preferencji użytkowników.
 
+
 ## 🚀 Technologie
 
 - **PHP 8.4** - Język backend
