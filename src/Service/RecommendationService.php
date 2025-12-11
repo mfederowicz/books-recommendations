@@ -15,6 +15,7 @@ use App\Entity\RecommendationResult;
 use App\Entity\Tag;
 use App\Repository\TagRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 final class RecommendationService implements RecommendationServiceInterface
 {
@@ -24,6 +25,7 @@ final class RecommendationService implements RecommendationServiceInterface
         private TagRepository $tagRepository,
         private OpenAIEmbeddingClientInterface $openAIEmbeddingClient,
         private EbookEmbeddingServiceInterface $ebookEmbeddingService,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -241,8 +243,10 @@ final class RecommendationService implements RecommendationServiceInterface
             $this->entityManager->flush();
         } catch (\Exception $e) {
             // Log error but don't fail the recommendation creation
-            // In production, this should be logged to a proper logging system
-            error_log('Failed to search and store similar ebooks: '.$e->getMessage());
+            $this->logger->error('Failed to search and store similar ebooks: {error}', [
+                'error' => $e->getMessage(),
+                'exception' => $e,
+            ]);
         }
     }
 
