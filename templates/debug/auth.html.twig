@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Auth Debug - {{ parent() }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow">
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <h1 class="text-xl font-bold">🔍 Authentication Debug Information</h1>
+        <p class="text-sm mt-2">This page shows detailed authentication and session information to help debug login issues. <strong>Only visible in development/test environments.</strong></p>
+    </div>
+
+    <div class="space-y-6">
+        <!-- User Information -->
+        <div class="border rounded p-4">
+            <h2 class="text-lg font-semibold mb-3 text-blue-600">👤 User Information</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <dt class="font-medium">getUser() result:</dt>
+                <dd class="font-mono text-sm">{{ debug.user_from_getUser ?: 'null' }}</dd>
+
+                <dt class="font-medium">Is authenticated:</dt>
+                <dd class="font-mono text-sm {{ debug.is_authenticated ? 'text-green-600' : 'text-red-600' }}">
+                    {{ debug.is_authenticated ? 'YES' : 'NO' }}
+                </dd>
+
+                <dt class="font-medium">Security token exists:</dt>
+                <dd class="font-mono text-sm {{ debug.token_exists ? 'text-green-600' : 'text-red-600' }}">
+                    {{ debug.token_exists ? 'YES' : 'NO' }}
+                </dd>
+
+                <dt class="font-medium">Token class:</dt>
+                <dd class="font-mono text-sm">{{ debug.token_class ?: 'null' }}</dd>
+
+                <dt class="font-medium">Environment:</dt>
+                <dd class="font-mono text-sm">{{ debug.environment }}</dd>
+
+                <dt class="font-medium">Debug mode:</dt>
+                <dd class="font-mono text-sm {{ debug.debug_mode ? 'text-green-600' : 'text-red-600' }}">
+                    {{ debug.debug_mode ? 'YES' : 'NO' }}
+                </dd>
+            </dl>
+        </div>
+
+        <!-- Session Information -->
+        <div class="border rounded p-4">
+            <h2 class="text-lg font-semibold mb-3 text-purple-600">💾 Session Data</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+                <dt class="font-medium">Session ID:</dt>
+                <dd class="font-mono text-sm">{{ debug.session_id }}</dd>
+
+                <dt class="font-medium">Session keys count:</dt>
+                <dd class="font-mono text-sm">{{ debug.session_count }}</dd>
+
+                <dt class="font-medium">Session keys:</dt>
+                <dd class="font-mono text-sm">{{ debug.session_keys|join(', ') }}</dd>
+            </dl>
+
+            <h3 class="font-medium mb-2 mt-4">Session attributes (non-Symfony):</h3>
+            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">{{ debug.session_attributes|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+        </div>
+
+
+        <!-- Request Information -->
+        <div class="border rounded p-4">
+            <h2 class="text-lg font-semibold mb-3 text-orange-600">🌐 Request Information</h2>
+
+            <h3 class="font-medium mb-2">Server Variables:</h3>
+            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mb-4">{{ debug.server_vars|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+
+            <h3 class="font-medium mb-2">Cookies:</h3>
+            <p class="text-sm mb-2">Has cookies: <span class="{{ debug.has_cookies ? 'text-green-600' : 'text-red-600' }}">{{ debug.has_cookies ? 'YES' : 'NO' }}</span> ({{ debug.cookie_count }} total)</p>
+        </div>
+    </div>
+
+    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded">
+        <h3 class="font-semibold text-yellow-800">🔧 Quick Actions</h3>
+        <div class="mt-2 space-x-2">
+            <a href="{{ path('homepage') }}" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">Home</a>
+            <a href="{{ path('app_login') }}" class="bg-green-500 text-white px-3 py-1 rounded text-sm">Login</a>
+            <a href="{{ path('app_logout') }}" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <button data-action="refresh" class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Refresh</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const refreshBtn = document.querySelector('[data-action="refresh"]');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            location.reload();
+        });
+    }
+});
+</script>
+{% endblock %}
