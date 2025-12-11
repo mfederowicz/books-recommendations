@@ -70,9 +70,11 @@ CREATE TABLE recommendations_embeddings (
 ```sql
 CREATE TABLE ebooks (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  isbn VARCHAR(20) NOT NULL UNIQUE,
+  isbn VARCHAR(13) NOT NULL UNIQUE,
   title VARCHAR(255) NOT NULL COLLATE utf8mb4_polish_ci,
   author VARCHAR(255) NOT NULL COLLATE utf8mb4_polish_ci,
+  main_description TEXT NULL COLLATE utf8mb4_polish_ci,
+  tags TEXT NULL,
   offers_count INT NOT NULL DEFAULT 0,
   comparison_link VARCHAR(512) NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -85,13 +87,13 @@ CREATE TABLE ebooks (
 ```sql
 CREATE TABLE ebooks_embeddings (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  ebook_id INT NOT NULL,
+  ebook_id VARCHAR(13) NOT NULL,
   vector JSON NOT NULL,
   payload_title VARCHAR(255) NOT NULL COLLATE utf8mb4_polish_ci,
   payload_author VARCHAR(255) NOT NULL COLLATE utf8mb4_polish_ci,
   payload_tags JSON NOT NULL,
+  payload_description TEXT NULL COLLATE utf8mb4_polish_ci,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (ebook_id) REFERENCES ebooks(id) ON DELETE CASCADE,
   UNIQUE KEY uk_ebook_id (ebook_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 ```
@@ -126,7 +128,7 @@ CREATE TABLE recommendations_tags (
 - `users` - `recommendations`: Relacja jeden-do-wielu (jeden użytkownik może mieć wiele rekomendacji)
 - `recommendations` - `recommendations_embeddings`: Relacja jeden-do-jednego oparta na `normalized_text_hash` (każda rekomendacja ma dokładnie jeden embedding)
 - `recommendations` - `tags`: Relacja wiele-do-wielu obsługiwana przez tabelę `recommendations_tags`
-- `ebooks` - `ebooks_embeddings`: Relacja jeden-do-jednego (każda książka ma dokładnie jeden embedding)
+- `ebooks` - `ebooks_embeddings`: Relacja jeden-do-jednego oparta na ISBN (ebook_id w ebooks_embeddings zawiera ISBN książki z tabeli ebooks)
 
 3. Indeksy
 
@@ -141,7 +143,7 @@ CREATE TABLE recommendations_tags (
 - `recommendations_embeddings.normalized_text_hash` - indeks dla wyszukiwania embeddingów
 - `ebooks.isbn` - unikalny indeks dla ISBN
 - `ebooks.title, author` - złożony indeks dla wyszukiwania książek
-- `ebooks_embeddings.ebook_id` - unikalny indeks dla powiązania z książkami
+- `ebooks_embeddings.ebook_id` - unikalny indeks dla ISBN książki
 - `tags.name` - unikalny indeks dla nazw tagów
 - `tags.ascii` - unikalny indeks dla wersji ASCII tagów (do URL)
 - `recommendations_tags.recommendation_id, tag_id` - złożony indeks podstawowy dla relacji wiele-do-wielu
@@ -225,6 +227,8 @@ GROUP BY r.id;
 
 5. Dodatkowe uwagi lub wyjaśnienia dotyczące decyzji projektowych
 
+- **Kodowanie znaków**: Wszystkie tabele używają domyślnie `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci` dla prawidłowej obsługi polskich znaków diakrytycznych.
+
 - **Bezpieczeństwo**: Implementacja mechanizmu throttling poprzez śledzenie nieudanych prób logowania z tego samego IP. Flagi `active`, `banned`, `suspended` umożliwiają szczegółową kontrolę dostępu.
 
 - **Optymalizacja wydajności**:
@@ -236,6 +240,6 @@ GROUP BY r.id;
 
 - **Integralność danych**: Klucze obce z `CASCADE DELETE` zapewniają automatyczne czyszczenie danych powiązanych. Unikalne indeksy zapobiegają duplikatom.
 
-- **Wsparcie dla Qdrant**: Wektory książek są przechowywane w `ebooks_embeddings` i będą synchronizowane z bazą wektorową Qdrant dla szybkiego wyszukiwania podobieństwa.
+- **Wsparcie dla Qdrant**: Wektory książek są przechowywane w `ebooks_embeddings` i będą synchronizowane z bazą wektorową Qdrant dla szybkiego wyszukiwania podobieństwa. Książki są identyfikowane po ISBN (13-cyfrowym).
 
 - **Walidacja danych**: Ograniczenia na poziomie bazy (UNIQUE, NOT NULL, CHECK constraints) wspierają logikę aplikacji przy walidacji opisów (30-500 znaków) i minimalnej liczby tagów.

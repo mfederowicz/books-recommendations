@@ -76,4 +76,9 @@ class OpenAIEmbeddingClientTest extends TestCase
 
         $this->assertEquals([], $result);
     }
+
+    public function testGetEmbeddingMethodExists(): void
+    {
+        $this->assertTrue(method_exists($this->client, 'getEmbedding'));
+    }
 }

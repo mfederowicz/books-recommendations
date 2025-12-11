@@ -124,11 +124,20 @@ class TestEmbeddingCommandTest extends TestCase
         $this->assertEquals('Test OpenAI embedding generation for given text', $this->command->getDescription());
     }
 
-    public function testCommandRequiresTextArgument(): void
+    public function testCommandHasOptionalTextArgument(): void
     {
         $commandTester = new CommandTester($this->command);
 
-        $this->expectException(\Symfony\Component\Console\Exception\RuntimeException::class);
-        $commandTester->execute([]);
+        // Text argument is now optional with default value 'test text'
+        $embedding = array_fill(0, 1536, 0.1);
+
+        $this->openAIEmbeddingClient
+            ->expects($this->once())
+            ->method('getEmbedding')
+            ->with('test text') // Default value
+            ->willReturn($embedding);
+
+        $exitCode = $commandTester->execute([]);
+        $this->assertEquals(0, $exitCode);
     }
 }

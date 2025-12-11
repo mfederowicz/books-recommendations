@@ -14,7 +14,7 @@ final class Version20251208161853 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Rename email index in users table to match Doctrine naming convention';
     }
 
     public function up(Schema $schema): void

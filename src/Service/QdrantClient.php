@@ -59,6 +59,41 @@ final class QdrantClient implements QdrantClientInterface
         }
     }
 
+    public function createCollectionWithNamedVectors(string $collectionName, array $namedVectors): bool
+    {
+        try {
+            // For named vectors, we need to structure the config differently
+            $vectorsConfig = [];
+            foreach ($namedVectors as $name => $size) {
+                $vectorsConfig[$name] = [
+                    'size' => $size,
+                    'distance' => 'Cosine',
+                ];
+            }
+
+            // Use raw HTTP request to create collection with named vectors
+            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+
+            $response = $httpClient->request('PUT', "http://{$this->host}:{$this->port}/collections/{$collectionName}", [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'vectors' => $vectorsConfig,
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $content = $response->toArray(false);
+
+            // Qdrant returns 200 on success, 409 if collection already exists
+            return (200 === $statusCode || 201 === $statusCode)
+                   || (409 === $statusCode && isset($content['result']) && 'ok' === $content['status']);
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Failed to create collection '{$collectionName}' with named vectors: ".$e->getMessage(), 0, $e);
+        }
+    }
+
     public function upsertPoint(string $collectionName, array $vector, string $id, array $payload = []): bool
     {
         try {
@@ -86,9 +121,21 @@ final class QdrantClient implements QdrantClientInterface
                 }
             }
 
-            $response = $this->client->collections($collectionName)->points()->upsert($points);
+            // Use HTTP client for upsert to handle named vectors properly
+            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
 
-            return $response->isSuccess();
+            $response = $httpClient->request('PUT', "http://{$this->host}:{$this->port}/collections/{$collectionName}/points", [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'points' => $points,
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+
+            return 200 === $statusCode || 201 === $statusCode;
         } catch (\Exception $e) {
             throw new \RuntimeException("Failed to upsert points in collection '{$collectionName}': ".$e->getMessage(), 0, $e);
         }
@@ -128,6 +175,58 @@ final class QdrantClient implements QdrantClientInterface
         }
     }
 
+    public function searchWithNamedVector(string $collectionName, string $vectorName, array $vector, int $limit = 10, array $filter = []): array
+    {
+        try {
+            // Use HTTP client for named vector search
+            $searchParams = [
+                'vector' => [
+                    'name' => $vectorName,
+                    'vector' => $vector,
+                ],
+                'limit' => $limit,
+                'with_payload' => true,
+            ];
+
+            if (!empty($filter)) {
+                $searchParams['filter'] = $filter;
+            }
+
+            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+            $response = $httpClient->request('POST', "http://{$this->host}:{$this->port}/collections/{$collectionName}/points/search", [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $searchParams,
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            if (200 !== $statusCode) {
+                $errorContent = $response->getContent(false);
+                error_log("Qdrant search failed: HTTP {$statusCode}, Response: {$errorContent}");
+
+                return [];
+            }
+
+            $data = $response->toArray();
+            $results = [];
+
+            foreach ($data['result'] ?? [] as $result) {
+                $results[] = [
+                    'id' => $result['id'] ?? null,
+                    'score' => $result['score'] ?? 0,
+                    'payload' => $result['payload'] ?? [],
+                    'vector' => $result['vector'] ?? [],
+                ];
+            }
+
+            return $results;
+        } catch (\Exception $e) {
+            error_log('Qdrant search error: '.$e->getMessage());
+            throw new \RuntimeException("Failed to search in collection '{$collectionName}' with named vector '{$vectorName}': ".$e->getMessage(), 0, $e);
+        }
+    }
+
     public function deletePoint(string $collectionName, string $id): bool
     {
         try {
@@ -157,13 +256,19 @@ final class QdrantClient implements QdrantClientInterface
     public function getCollectionInfo(string $collectionName): ?array
     {
         try {
-            $response = $this->client->collections($collectionName)->info();
+            // Use HTTP client for consistency
+            $httpClient = \Symfony\Component\HttpClient\HttpClient::create();
 
-            if (!$response->isSuccess()) {
+            $response = $httpClient->request('GET', "http://{$this->host}:{$this->port}/collections/{$collectionName}");
+
+            $statusCode = $response->getStatusCode();
+            if (200 !== $statusCode) {
                 return null;
             }
 
-            return $response->getData();
+            $data = $response->toArray();
+
+            return $data;
         } catch (\Exception $e) {
             return null; // Collection doesn't exist or error occurred
         }

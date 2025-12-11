@@ -30,7 +30,7 @@ interface EbookEmbeddingServiceInterface
     /**
      * Remove ebook embedding from Qdrant.
      */
-    public function removeEbookEmbeddingFromQdrant(int $ebookId): bool;
+    public function removeEbookEmbeddingFromQdrant(string $isbn): bool;
 
     /**
      * Sync all ebook embeddings to Qdrant.

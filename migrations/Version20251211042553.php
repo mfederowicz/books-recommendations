@@ -10,22 +10,22 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251208201716 extends AbstractMigration
+final class Version20251211042553 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Revert email index name back to "email" in users table';
+        return 'Add has_embedding flag to ebooks table for quick embedding status check';
     }
 
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE users RENAME INDEX uniq_1483a5e9e7927c74 TO email');
+        $this->addSql('ALTER TABLE ebooks ADD has_embedding TINYINT(1) NOT NULL DEFAULT 0');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE users RENAME INDEX email TO UNIQ_1483A5E9E7927C74');
+        $this->addSql('ALTER TABLE ebooks DROP has_embedding');
     }
 }

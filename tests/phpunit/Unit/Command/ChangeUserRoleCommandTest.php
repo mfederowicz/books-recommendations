@@ -168,6 +168,4 @@ class ChangeUserRoleCommandTest extends TestCase
         $this->assertEquals('app:user:change-role', $this->command->getName());
         $this->assertEquals('Change a user role (user, admin, read_only)', $this->command->getDescription());
     }
-
-    // Test temporarily removed due to complex mocking issues with CommandTester
 }

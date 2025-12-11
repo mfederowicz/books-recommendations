@@ -14,7 +14,7 @@ final class Version20251209112526 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Drop existing indexes before recreating them to match entity definitions';
     }
 
     public function up(Schema $schema): void
