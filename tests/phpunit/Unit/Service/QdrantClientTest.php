@@ -75,6 +75,48 @@ class QdrantClientTest extends TestCase
         ]);
     }
 
+    public function testConstructorCreatesClientWithDefaultValues(): void
+    {
+        putenv('QDRANT_HOST');
+        putenv('QDRANT_PORT');
+
+        $client = new QdrantClient();
+
+        $reflection = new \ReflectionClass($client);
+        $hostProperty = $reflection->getProperty('host');
+        $portProperty = $reflection->getProperty('port');
+
+        $hostProperty->setAccessible(true);
+        $portProperty->setAccessible(true);
+
+        $this->assertEquals('localhost', $hostProperty->getValue($client));
+        $this->assertEquals(6333, $portProperty->getValue($client));
+    }
+
+    public function testConstructorUsesDefaultPortWhenNotSet(): void
+    {
+        putenv('QDRANT_HOST=test');
+        putenv('QDRANT_PORT');
+
+        $client = new QdrantClient();
+
+        $reflection = new \ReflectionClass($client);
+        $portProperty = $reflection->getProperty('port');
+        $portProperty->setAccessible(true);
+
+        $this->assertEquals(6333, $portProperty->getValue($client));
+    }
+
+    public function testGetCollectionInfoMethodExists(): void
+    {
+        $this->assertTrue(method_exists($this->client, 'getCollectionInfo'));
+    }
+
+    public function testDeleteCollectionMethodExists(): void
+    {
+        $this->assertTrue(method_exists($this->client, 'deleteCollection'));
+    }
+
     /**
      * Helper method to inject mock Qdrant client using reflection.
      */

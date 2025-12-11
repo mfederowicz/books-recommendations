@@ -22,7 +22,9 @@ final class LoginSuccessListener
 
         if ($user && method_exists($user, 'getUserIdentifier')) {
             $email = $user->getUserIdentifier();
-            $this->loginThrottlingService->clearFailedLoginAttempts($email);
+            if (!empty($email)) {
+                $this->loginThrottlingService->clearFailedLoginAttempts($email);
+            }
         }
     }
 }

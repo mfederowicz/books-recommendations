@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Form;
 use App\Entity\User;
 use App\Form\RegisterUserAccount;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class RegisterUserAccountTest extends TestCase
@@ -35,6 +36,18 @@ class RegisterUserAccountTest extends TestCase
     public function testFormHasCorrectName(): void
     {
         $this->assertEquals('App\Form\RegisterUserAccount', get_class($this->form));
+    }
+
+    public function testBuildForm(): void
+    {
+        $builder = $this->createMock(FormBuilderInterface::class);
+
+        // Just check that add method is called at least once
+        $builder->expects($this->atLeastOnce())
+            ->method('add')
+            ->willReturn($builder);
+
+        $this->form->buildForm($builder, []);
     }
 
     // Note: Full testing of form building requires integration tests
