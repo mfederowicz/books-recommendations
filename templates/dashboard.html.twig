@@ -4,8 +4,30 @@
 
 {% block body %}
 <div class="min-h-screen bg-gray-50">
-  <!-- Formularz rekomendacji (sticky na górze) -->
-  <div class="sticky top-0 bg-white shadow-sm border-b z-10">
+  <!-- Główna nawigacja między sekcjami -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex space-x-8">
+        <button
+          id="add-recommendation-tab"
+          class="tab-button active py-4 px-2 border-b-2 border-indigo-500 font-medium text-indigo-600"
+          onclick="showTab('add-recommendation')"
+        >
+          {{ 'dashboard.add_recommendation'|trans }}
+        </button>
+        <button
+          id="my-recommendations-tab"
+          class="tab-button py-4 px-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700"
+          onclick="showTab('my-recommendations')"
+        >
+          {{ 'dashboard.my_recommendations'|trans }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sekcja dodawania rekomendacji -->
+  <div id="add-recommendation-section" class="tab-content">
     <div class="max-w-4xl mx-auto p-6">
       <div class="bg-white rounded-lg shadow-sm border p-6">
         <!-- Miejsce na komunikaty sukcesu/błędu -->
@@ -98,25 +120,63 @@
     </div>
   </div>
 
-  <!-- Lista rekomendacji użytkownika -->
-  <div class="max-w-4xl mx-auto p-6">
+  <!-- Sekcja rekomendacji użytkownika -->
+  <div id="my-recommendations-section" class="tab-content hidden">
+    <div class="max-w-6xl mx-auto p-6">
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-gray-900">{{ 'dashboard.your_recommendations'|trans }}</h2>
       <p class="text-gray-600 mt-1">{{ 'dashboard.recommendations_description'|trans }}</p>
     </div>
 
-    <!-- Placeholder dla rekomendacji -->
-    <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
-      <div class="text-gray-400 mb-4">
-        <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-        </svg>
+    <!-- Kontener dla rekomendacji ładowanych przez HTMX -->
+    <div
+      id="recommendations-container"
+      hx-get="/recommendations/list"
+      hx-trigger="load, recommendationsUpdated from:body"
+      hx-target="this"
+      hx-swap="innerHTML"
+    >
+      <!-- Ładowanie podczas pierwszego ładowania strony -->
+      <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+        <div class="text-gray-400 mb-4">
+          <svg class="animate-spin mx-auto h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        <p class="text-gray-500">{{ 'dashboard.loading_recommendations'|trans }}</p>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">{{ 'dashboard.no_recommendations'|trans }}</h3>
-      <p class="text-gray-500">{{ 'dashboard.add_description_message'|trans }}</p>
     </div>
   </div>
 </div>
+
+<script>
+// Funkcje obsługi zakładek
+function showTab(tabName) {
+  // Ukryj wszystkie sekcje
+  document.querySelectorAll('.tab-content').forEach(section => {
+    section.classList.add('hidden');
+  });
+
+  // Usuń aktywną klasę ze wszystkich przycisków
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+    button.classList.add('border-transparent', 'text-gray-500');
+  });
+
+  // Pokaż wybraną sekcję
+  document.getElementById(tabName + '-section').classList.remove('hidden');
+
+  // Aktywuj przycisk
+  document.getElementById(tabName + '-tab').classList.add('active', 'border-indigo-500', 'text-indigo-600');
+  document.getElementById(tabName + '-tab').classList.remove('border-transparent', 'text-gray-500');
+}
+
+// Inicjalizacja - domyślnie pokaż rekomendacje (lepsze UX)
+document.addEventListener('DOMContentLoaded', function() {
+  showTab('my-recommendations');
+});
+</script>
 
 <script>
 // Inicjalizacja walidacji przy ładowaniu strony
