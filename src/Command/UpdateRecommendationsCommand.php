@@ -81,19 +81,19 @@ final class UpdateRecommendationsCommand extends Command
             $exitCode = $command->run(new \Symfony\Component\Console\Input\ArrayInput($arguments), $output);
 
             if (!$quiet) {
-                if ($exitCode === Command::SUCCESS) {
+                if (Command::SUCCESS === $exitCode) {
                     $io->success('Recommendation update completed successfully');
                 } else {
-                    $io->error('Recommendation update failed with exit code: ' . $exitCode);
+                    $io->error('Recommendation update failed with exit code: '.$exitCode);
+
                     return $exitCode;
                 }
             }
 
             return $exitCode;
-
         } catch (\Exception $e) {
             if (!$quiet) {
-                $io->error('Update failed: ' . $e->getMessage());
+                $io->error('Update failed: '.$e->getMessage());
 
                 if ($io->isVerbose()) {
                     $io->writeln('<comment>Stack trace:</comment>');
