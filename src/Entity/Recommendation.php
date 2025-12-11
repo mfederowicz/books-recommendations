@@ -34,6 +34,12 @@ class Recommendation
     #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private \DateTimeInterface $updatedAt;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $foundBooksCount = 0;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $lastSearchAt = null;
+
     /**
      * @var Collection<int, Tag>
      */
@@ -43,9 +49,16 @@ class Recommendation
     #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Collection $tags;
 
+    /**
+     * @var Collection<int, RecommendationResult>
+     */
+    #[ORM\OneToMany(targetEntity: RecommendationResult::class, mappedBy: 'recommendation', cascade: ['remove'])]
+    private Collection $recommendationResults;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+        $this->recommendationResults = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
@@ -115,6 +128,30 @@ class Recommendation
         return $this;
     }
 
+    public function getFoundBooksCount(): int
+    {
+        return $this->foundBooksCount;
+    }
+
+    public function setFoundBooksCount(int $foundBooksCount): self
+    {
+        $this->foundBooksCount = $foundBooksCount;
+
+        return $this;
+    }
+
+    public function getLastSearchAt(): ?\DateTimeInterface
+    {
+        return $this->lastSearchAt;
+    }
+
+    public function setLastSearchAt(?\DateTimeInterface $lastSearchAt): self
+    {
+        $this->lastSearchAt = $lastSearchAt;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Tag>
      */
@@ -152,5 +189,13 @@ class Recommendation
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, RecommendationResult>
+     */
+    public function getRecommendationResults(): Collection
+    {
+        return $this->recommendationResults;
     }
 }

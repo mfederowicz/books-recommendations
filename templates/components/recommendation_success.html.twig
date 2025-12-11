@@ -1,19 +1,25 @@
-<div class="bg-green-50 border border-green-200 rounded-md p-4 mb-4 toast-message" data-type="success">
+<div class="{% if type == 'delete' %}bg-red-50 border border-red-200{% else %}bg-green-50 border border-green-200{% endif %} rounded-md p-4 mb-4 toast-message" data-type="{{ type|default('success') }}">
   <div class="flex">
     <div class="flex-shrink-0">
-      <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-      </svg>
+      {% if type == 'delete' %}
+        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+      {% else %}
+        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+      {% endif %}
     </div>
     <div class="ml-3 flex-1">
-      <h3 class="text-sm font-medium text-green-800">{{ 'components.recommendations.success.title'|trans }}</h3>
-      <div class="mt-2 text-sm text-green-700">
-        <p>{{ 'components.recommendations.success.message'|trans }}</p>
+      <h3 class="text-sm font-medium {% if type == 'delete' %}text-red-800{% else %}text-green-800{% endif %}">{{ 'components.recommendations.success.title'|trans }}</h3>
+      <div class="mt-2 text-sm {% if type == 'delete' %}text-red-700{% else %}text-green-700{% endif %}">
+        <p>{% if message is defined %}{{ message|trans }}{% else %}{{ 'components.recommendations.success.message'|trans }}{% endif %}</p>
       </div>
     </div>
     <div class="ml-auto pl-3">
       <div class="-mx-1.5 -my-1.5">
-        <button type="button" class="inline-flex bg-green-50 rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600 close-toast">
+        <button type="button" class="inline-flex {% if type == 'delete' %}bg-red-50 text-red-500 hover:bg-red-100 focus:ring-offset-red-50 focus:ring-red-600{% else %}bg-green-50 text-green-500 hover:bg-green-100 focus:ring-offset-green-50 focus:ring-green-600{% endif %} rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 close-toast">
           <span class="sr-only">Dismiss</span>
           <svg class="h-3 w-3" fill="none" viewBox="0 0 20 20" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

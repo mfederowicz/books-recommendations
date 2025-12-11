@@ -9,6 +9,7 @@ use App\Entity\Tag;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class CleanEbooksDataCommandTest extends TestCase
 {
@@ -206,4 +207,6 @@ class CleanEbooksDataCommandTest extends TestCase
         $result = $method->invoke($this->command, $longTag, false);
         $this->assertEquals(0, $result);
     }
+
+    // Integration tests with CommandTester
 }

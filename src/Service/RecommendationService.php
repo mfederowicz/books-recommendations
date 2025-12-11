@@ -8,8 +8,10 @@ use App\DTO\EbookEmbeddingServiceInterface;
 use App\DTO\OpenAIEmbeddingClientInterface;
 use App\DTO\RecommendationServiceInterface;
 use App\DTO\TextNormalizationServiceInterface;
+use App\Entity\Ebook;
 use App\Entity\Recommendation;
 use App\Entity\RecommendationEmbedding;
+use App\Entity\RecommendationResult;
 use App\Entity\Tag;
 use App\Repository\TagRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -187,5 +189,76 @@ final class RecommendationService implements RecommendationServiceInterface
         $this->entityManager->flush();
 
         return $embedding;
+    }
+
+    /**
+     * Search for similar ebooks for a given recommendation and store results in recommendation_results table.
+     * This should be called after creating a recommendation or when updating search results.
+     */
+    public function searchAndStoreSimilarEbooks(Recommendation $recommendation): void
+    {
+        try {
+            // Get embedding for the recommendation
+            $queryEmbedding = $this->getOrCreateQueryEmbedding($recommendation->getShortDescription());
+
+            // Search for similar books (limit to 20 results)
+            $similarEbooks = $this->ebookEmbeddingService->findSimilarEbooks($queryEmbedding, 20);
+
+            if (empty($similarEbooks)) {
+                // No results found, update counters
+                $recommendation->setFoundBooksCount(0);
+                $recommendation->setLastSearchAt(new \DateTime());
+                $this->entityManager->flush();
+
+                return;
+            }
+
+            // First, remove existing results for this recommendation
+            $this->clearExistingResults($recommendation);
+
+            // Store new results
+            $rankOrder = 1;
+            foreach ($similarEbooks as $ebookData) {
+                $ebook = $this->entityManager->getRepository(Ebook::class)->findOneBy(['isbn' => $ebookData['isbn']]);
+                if (null === $ebook) {
+                    continue; // Skip if ebook not found in database
+                }
+
+                $result = new RecommendationResult();
+                $result->setRecommendation($recommendation);
+                $result->setEbook($ebook);
+                $result->setSimilarityScore((float) $ebookData['similarity_score']);
+                $result->setRankOrder($rankOrder);
+
+                $this->entityManager->persist($result);
+                ++$rankOrder;
+            }
+
+            // Update recommendation counters
+            $recommendation->setFoundBooksCount($rankOrder - 1);
+            $recommendation->setLastSearchAt(new \DateTime());
+
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            // Log error but don't fail the recommendation creation
+            // In production, this should be logged to a proper logging system
+            error_log('Failed to search and store similar ebooks: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Clear existing results for a recommendation before storing new ones.
+     */
+    private function clearExistingResults(Recommendation $recommendation): void
+    {
+        $existingResults = $this->entityManager
+            ->getRepository(RecommendationResult::class)
+            ->findBy(['recommendation' => $recommendation]);
+
+        foreach ($existingResults as $result) {
+            $this->entityManager->remove($result);
+        }
+
+        $this->entityManager->flush();
     }
 }

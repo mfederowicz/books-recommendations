@@ -44,6 +44,20 @@ app_recommendations_list:
     controller: App\Controller\RecommendationController::list
     methods: [GET]
 
+app_recommendations_show:
+    path: /recommendations/{id}/books
+    controller: App\Controller\RecommendationController::show
+    methods: [GET]
+    requirements:
+        id: \d+
+
+app_recommendations_delete:
+    path: /recommendations/{id}
+    controller: App\Controller\RecommendationController::delete
+    methods: [DELETE]
+    requirements:
+        id: \d+
+
 # Handle Chrome DevTools and other .well-known requests
 well_known:
     path: /.well-known/{path}

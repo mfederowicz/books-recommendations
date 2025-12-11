@@ -49,6 +49,8 @@ CREATE TABLE recommendations (
   user_id INT NOT NULL,
   short_description TEXT NOT NULL COLLATE utf8mb4_polish_ci,
   normalized_text_hash VARCHAR(64) NOT NULL UNIQUE,
+  found_books_count INT NOT NULL DEFAULT 0,
+  last_search_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -64,6 +66,22 @@ CREATE TABLE recommendations_embeddings (
   embedding JSON NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_normalized_hash (normalized_text_hash)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
+```
+
+```sql
+CREATE TABLE recommendation_results (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  recommendation_id INT NOT NULL,
+  ebook_id INT NOT NULL,
+  similarity_score DECIMAL(5,4) NOT NULL,
+  rank_order INT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (recommendation_id) REFERENCES recommendations(id) ON DELETE CASCADE,
+  FOREIGN KEY (ebook_id) REFERENCES ebooks(id) ON DELETE CASCADE,
+  UNIQUE KEY uk_recommendation_ebook (recommendation_id, ebook_id),
+  INDEX idx_recommendation_similarity (recommendation_id, similarity_score DESC),
+  INDEX idx_recommendation_rank (recommendation_id, rank_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 ```
 
@@ -128,7 +146,9 @@ CREATE TABLE recommendations_tags (
 - `users` - `recommendations`: Relacja jeden-do-wielu (jeden użytkownik może mieć wiele rekomendacji)
 - `recommendations` - `recommendations_embeddings`: Relacja jeden-do-jednego oparta na `normalized_text_hash` (każda rekomendacja ma dokładnie jeden embedding)
 - `recommendations` - `tags`: Relacja wiele-do-wielu obsługiwana przez tabelę `recommendations_tags`
+- `recommendations` - `recommendation_results`: Relacja jeden-do-wielu (jedna rekomendacja może mieć wiele wyników wyszukiwania książek)
 - `ebooks` - `ebooks_embeddings`: Relacja jeden-do-jednego oparta na ISBN (ebook_id w ebooks_embeddings zawiera ISBN książki z tabeli ebooks)
+- `recommendation_results` - `ebooks`: Relacja wiele-do-jednego (wiele wyników rekomendacji może odnosić się do tej samej książki)
 
 3. Indeksy
 
@@ -141,6 +161,9 @@ CREATE TABLE recommendations_tags (
 - `recommendations.user_id, created_at` - złożony indeks dla listowania rekomendacji użytkownika posortowanych po dacie
 - `recommendations.normalized_text_hash` - unikalny indeks dla powiązania z embeddingami
 - `recommendations_embeddings.normalized_text_hash` - indeks dla wyszukiwania embeddingów
+- `recommendation_results.recommendation_id, ebook_id` - unikalny indeks zapewniający, że każda książka może pojawić się tylko raz w wynikach jednej rekomendacji
+- `recommendation_results.recommendation_id, similarity_score DESC` - indeks dla sortowania wyników rekomendacji po podobieństwie malejąco
+- `recommendation_results.recommendation_id, rank_order` - indeks dla sortowania wyników rekomendacji po kolejności rankingowej
 - `ebooks.isbn` - unikalny indeks dla ISBN
 - `ebooks.title, author` - złożony indeks dla wyszukiwania książek
 - `ebooks_embeddings.ebook_id` - unikalny indeks dla ISBN książki
@@ -241,5 +264,7 @@ GROUP BY r.id;
 - **Integralność danych**: Klucze obce z `CASCADE DELETE` zapewniają automatyczne czyszczenie danych powiązanych. Unikalne indeksy zapobiegają duplikatom.
 
 - **Wsparcie dla Qdrant**: Wektory książek są przechowywane w `ebooks_embeddings` i będą synchronizowane z bazą wektorową Qdrant dla szybkiego wyszukiwania podobieństwa. Książki są identyfikowane po ISBN (13-cyfrowym).
+
+- **System rekomendacji**: Tabela `recommendation_results` przechowuje wyniki dopasowań między rekomendacjami użytkowników a książkami. Pole `similarity_score` zawiera wartość podobieństwa (0-1), a `rank_order` określa pozycję w rankingach. Pole `found_books_count` w tabeli `recommendations` śledzi liczbę znalezionych książek, a `last_search_at` datę ostatniego wyszukiwania.
 
 - **Walidacja danych**: Ograniczenia na poziomie bazy (UNIQUE, NOT NULL, CHECK constraints) wspierają logikę aplikacji przy walidacji opisów (30-500 znaków) i minimalnej liczby tagów.
