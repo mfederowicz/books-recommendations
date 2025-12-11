@@ -6,11 +6,19 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 final class DefaultController extends AbstractController
 {
+    public function __construct(
+        private RequestStack $requestStack,
+        private ?TokenStorageInterface $tokenStorage = null
+    ) {
+    }
+
     /**
      * @Route("/", name="homepage")
      */
@@ -24,7 +32,9 @@ final class DefaultController extends AbstractController
             // Logged in user - show dashboard
             return $this->render('dashboard.html.twig');
         } else {
-            error_log("No authenticated user - showing homepage. Session ID: " . $this->get('request_stack')->getCurrentRequest()->getSession()->getId());
+            $request = $this->requestStack->getCurrentRequest();
+            $sessionId = $request ? $request->getSession()->getId() : 'no-session';
+            error_log("No authenticated user - showing homepage. Session ID: " . $sessionId);
             // Not logged in - show landing page
             return $this->render('homepage.html.twig');
         }
@@ -63,13 +73,7 @@ final class DefaultController extends AbstractController
         $session = $request->getSession();
 
         // Check for security token
-        $token = null;
-        try {
-            $tokenStorage = $this->container->get('security.token_storage');
-            $token = $tokenStorage->getToken();
-        } catch (\Exception $e) {
-            // Ignore if token storage is not available
-        }
+        $token = $this->tokenStorage?->getToken();
 
         $debug = [
             'user_from_getUser' => $user ? $user->getEmail() : null,
