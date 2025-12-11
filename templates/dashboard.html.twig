@@ -11,14 +11,14 @@
         <button
           id="add-recommendation-tab"
           class="tab-button active py-4 px-2 border-b-2 border-indigo-500 font-medium text-indigo-600"
-          onclick="showTab('add-recommendation')"
+          data-tab="add-recommendation"
         >
           {{ 'dashboard.add_recommendation'|trans }}
         </button>
         <button
           id="my-recommendations-tab"
           class="tab-button py-4 px-2 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700"
-          onclick="showTab('my-recommendations')"
+          data-tab="my-recommendations"
         >
           {{ 'dashboard.my_recommendations'|trans }}
         </button>
@@ -101,7 +101,7 @@
                 class="h-11 inline-flex items-center justify-center px-6 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 id="submit-btn"
                 disabled
-                onclick="submitForm()"
+                data-action="submit-form"
               >
                   <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white hidden" id="loading-spinner" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -175,6 +175,26 @@ function showTab(tabName) {
 // Inicjalizacja - domyślnie pokaż rekomendacje (lepsze UX)
 document.addEventListener('DOMContentLoaded', function() {
   showTab('my-recommendations');
+
+  // Set up event delegation for tab buttons
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', function() {
+      const tabName = this.getAttribute('data-tab');
+      if (tabName) {
+        showTab(tabName);
+      }
+    });
+  });
+
+  // Set up event listener for submit button
+  const submitBtn = document.getElementById('submit-btn');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', function() {
+      if (!this.disabled) {
+        submitForm();
+      }
+    });
+  }
 });
 </script>
 
@@ -350,7 +370,7 @@ document.addEventListener('htmx:afterRequest', function(evt) {
 
     // Sprawdź czy odpowiedź zawiera jakieś tagi
     const response = evt.detail.xhr.response || '';
-    const hasContent = response.includes('onclick="selectTagSuggestion');
+    const hasContent = response.includes('tag-suggestion');
 
     if (hasContent) {
       suggestions.classList.remove('hidden');
@@ -384,8 +404,19 @@ document.getElementById('tag-input').addEventListener('keydown', function(e) {
   }
 });
 
-// Zamknij sugestie po kliknięciu poza nimi
+// Event delegation for tag suggestions
 document.addEventListener('click', function(e) {
+  // Handle tag suggestion clicks
+  if (e.target.closest('.tag-suggestion')) {
+    const suggestion = e.target.closest('.tag-suggestion');
+    const tagName = suggestion.getAttribute('data-tag-name');
+    if (tagName) {
+      selectTagSuggestion(tagName, e);
+    }
+    return;
+  }
+
+  // Zamknij sugestie po kliknięciu poza nimi
   const tagInput = document.getElementById('tag-input');
   const suggestions = document.getElementById('tag-suggestions');
 

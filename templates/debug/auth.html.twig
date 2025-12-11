@@ -77,8 +77,19 @@
             <a href="{{ path('homepage') }}" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">Home</a>
             <a href="{{ path('app_login') }}" class="bg-green-500 text-white px-3 py-1 rounded text-sm">Login</a>
             <a href="{{ path('app_logout') }}" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</a>
-            <button onclick="location.reload()" class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Refresh</button>
+            <button data-action="refresh" class="bg-gray-500 text-white px-3 py-1 rounded text-sm">Refresh</button>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const refreshBtn = document.querySelector('[data-action="refresh"]');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            location.reload();
+        });
+    }
+});
+</script>
 {% endblock %}
