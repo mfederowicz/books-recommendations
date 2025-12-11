@@ -90,8 +90,8 @@ final class CleanEbooksDataCommand extends Command
                     $cleanDescription = $this->cleanDescription($ebook->getMainDescription());
                     $formattedDescription = $this->formatDescription($ebook->getTitle(), $ebook->getAuthor(), $cleanDescription);
 
-                    // 2. Set comparison link
-                    $comparisonLink = sprintf('https://ebooki.swiatczytnikow.pl/ebook/%s', $ebook->getIsbn());
+                    // 2. Set comparison link to null (no external images)
+                    $comparisonLink = null;
 
                     // 3. Extract and save tags
                     $newTagsCount = $this->extractAndSaveTags($ebook->getTags(), $dryRun);
