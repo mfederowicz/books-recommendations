@@ -16,7 +16,7 @@ class RecommendationResult
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Recommendation::class)]
+    #[ORM\ManyToOne(targetEntity: Recommendation::class, inversedBy: 'recommendationResults')]
     #[ORM\JoinColumn(name: 'recommendation_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Recommendation $recommendation;
 
@@ -24,7 +24,7 @@ class RecommendationResult
     #[ORM\JoinColumn(name: 'ebook_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Ebook $ebook;
 
-    #[ORM\Column(type: 'decimal', precision: 5, scale: 4)]
+    #[ORM\Column(type: 'float')]
     private float $similarityScore;
 
     #[ORM\Column(type: 'integer')]
