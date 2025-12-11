@@ -3,8 +3,9 @@
 {% block title %}Auth Debug - {{ parent() }}{% endblock %}
 
 {% block body %}
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow">
     <h1 class="text-2xl font-bold mb-6 text-red-600">🔍 Authentication Debug Information</h1>
+    <p class="text-sm text-gray-600 mb-6">This page shows detailed authentication and session information to help debug login issues on production.</p>
 
     <div class="space-y-6">
         <!-- User Information -->
@@ -14,12 +15,17 @@
                 <dt class="font-medium">getUser() result:</dt>
                 <dd class="font-mono text-sm">{{ debug.user_from_getUser ?: 'null' }}</dd>
 
-                <dt class="font-medium">app.user result:</dt>
-                <dd class="font-mono text-sm">{{ debug.user_from_app ?: 'null' }}</dd>
-
                 <dt class="font-medium">Is authenticated:</dt>
                 <dd class="font-mono text-sm {{ debug.is_authenticated ? 'text-green-600' : 'text-red-600' }}">
                     {{ debug.is_authenticated ? 'YES' : 'NO' }}
+                </dd>
+
+                <dt class="font-medium">Environment:</dt>
+                <dd class="font-mono text-sm">{{ debug.environment }}</dd>
+
+                <dt class="font-medium">Debug mode:</dt>
+                <dd class="font-mono text-sm {{ debug.debug_mode ? 'text-green-600' : 'text-red-600' }}">
+                    {{ debug.debug_mode ? 'YES' : 'NO' }}
                 </dd>
             </dl>
         </div>

@@ -40,7 +40,6 @@ final class DefaultController extends AbstractController
 
         $debug = [
             'user_from_getUser' => $user ? $user->getEmail() : null,
-            'user_from_app' => $this->get('twig')->getGlobals()['app']->getUser() ? $this->get('twig')->getGlobals()['app']->getUser()->getEmail() : null,
             'is_authenticated' => $this->isGranted('IS_AUTHENTICATED_FULLY'),
             'session_id' => $session->getId(),
             'session_keys' => array_keys($session->all()),
@@ -53,6 +52,8 @@ final class DefaultController extends AbstractController
             ],
             'has_cookies' => !empty($request->cookies->all()),
             'cookie_count' => count($request->cookies->all()),
+            'environment' => $this->getParameter('kernel.environment'),
+            'debug_mode' => $this->getParameter('kernel.debug'),
         ];
 
         return $this->render('debug/auth.html.twig', [
