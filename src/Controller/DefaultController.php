@@ -16,13 +16,18 @@ final class DefaultController extends AbstractController
      */
     public function index(): Response
     {
-        if ($this->getUser()) {
+        $user = $this->getUser();
+
+        // Debug logging for production troubleshooting
+        if ($user) {
+            error_log("User authenticated: " . $user->getEmail() . " - showing dashboard");
             // Logged in user - show dashboard
             return $this->render('dashboard.html.twig');
+        } else {
+            error_log("No authenticated user - showing homepage");
+            // Not logged in - show landing page
+            return $this->render('homepage.html.twig');
         }
-
-        // Not logged in - show landing page
-        return $this->render('homepage.html.twig');
     }
 
     /**
@@ -38,12 +43,26 @@ final class DefaultController extends AbstractController
         $user = $this->getUser();
         $session = $request->getSession();
 
+        // Check for security token
+        $token = null;
+        try {
+            $tokenStorage = $this->container->get('security.token_storage');
+            $token = $tokenStorage->getToken();
+        } catch (\Exception $e) {
+            // Ignore if token storage is not available
+        }
+
         $debug = [
             'user_from_getUser' => $user ? $user->getEmail() : null,
             'is_authenticated' => $this->isGranted('IS_AUTHENTICATED_FULLY'),
+            'token_exists' => $token !== null,
+            'token_class' => $token ? get_class($token) : null,
             'session_id' => $session->getId(),
             'session_keys' => array_keys($session->all()),
             'session_count' => count($session->all()),
+            'session_attributes' => array_filter($session->all(), function($key) {
+                return !str_starts_with($key, '_sf2'); // Filter out Symfony internal session keys
+            }, ARRAY_FILTER_USE_KEY),
             'server_vars' => [
                 'REQUEST_METHOD' => $request->server->get('REQUEST_METHOD'),
                 'HTTP_HOST' => $request->server->get('HTTP_HOST'),

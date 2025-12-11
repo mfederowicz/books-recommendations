@@ -22,6 +22,14 @@
                     {{ debug.is_authenticated ? 'YES' : 'NO' }}
                 </dd>
 
+                <dt class="font-medium">Security token exists:</dt>
+                <dd class="font-mono text-sm {{ debug.token_exists ? 'text-green-600' : 'text-red-600' }}">
+                    {{ debug.token_exists ? 'YES' : 'NO' }}
+                </dd>
+
+                <dt class="font-medium">Token class:</dt>
+                <dd class="font-mono text-sm">{{ debug.token_class ?: 'null' }}</dd>
+
                 <dt class="font-medium">Environment:</dt>
                 <dd class="font-mono text-sm">{{ debug.environment }}</dd>
 
@@ -45,6 +53,9 @@
                 <dt class="font-medium">Session keys:</dt>
                 <dd class="font-mono text-sm">{{ debug.session_keys|join(', ') }}</dd>
             </dl>
+
+            <h3 class="font-medium mb-2 mt-4">Session attributes (non-Symfony):</h3>
+            <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto">{{ debug.session_attributes|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
         </div>
 
 
