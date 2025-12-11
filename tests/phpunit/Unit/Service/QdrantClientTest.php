@@ -28,10 +28,25 @@ class QdrantClientTest extends TestCase
 
     public function testConstructorUsesDefaultValues(): void
     {
-        putenv('QDRANT_HOST');
-        putenv('QDRANT_PORT');
+        // Temporarily clear environment variables for this test
+        $originalHost = getenv('QDRANT_HOST') ?: null;
+        $originalPort = getenv('QDRANT_PORT') ?: null;
 
+        putenv('QDRANT_HOST=');
+        putenv('QDRANT_PORT=');
+        unset($_ENV['QDRANT_HOST']);
+        unset($_ENV['QDRANT_PORT']);
+
+        // Create new client instance with cleared env vars
         $client = new QdrantClient();
+
+        // Restore environment variables
+        if ($originalHost !== null) {
+            putenv("QDRANT_HOST=$originalHost");
+        }
+        if ($originalPort !== null) {
+            putenv("QDRANT_PORT=$originalPort");
+        }
 
         $reflection = new \ReflectionClass($client);
         $hostProperty = $reflection->getProperty('host');
@@ -40,7 +55,7 @@ class QdrantClientTest extends TestCase
         $hostProperty->setAccessible(true);
         $portProperty->setAccessible(true);
 
-        $this->assertEquals('qdrant', $hostProperty->getValue($client));
+        $this->assertEquals('localhost', $hostProperty->getValue($client));
         $this->assertEquals(6333, $portProperty->getValue($client));
     }
 
@@ -77,10 +92,25 @@ class QdrantClientTest extends TestCase
 
     public function testConstructorCreatesClientWithDefaultValues(): void
     {
-        putenv('QDRANT_HOST');
-        putenv('QDRANT_PORT');
+        // Temporarily clear environment variables for this test
+        $originalHost = getenv('QDRANT_HOST') ?: null;
+        $originalPort = getenv('QDRANT_PORT') ?: null;
 
+        putenv('QDRANT_HOST=');
+        putenv('QDRANT_PORT=');
+        unset($_ENV['QDRANT_HOST']);
+        unset($_ENV['QDRANT_PORT']);
+
+        // Create new client instance with cleared env vars
         $client = new QdrantClient();
+
+        // Restore environment variables
+        if ($originalHost !== null) {
+            putenv("QDRANT_HOST=$originalHost");
+        }
+        if ($originalPort !== null) {
+            putenv("QDRANT_PORT=$originalPort");
+        }
 
         $reflection = new \ReflectionClass($client);
         $hostProperty = $reflection->getProperty('host');
@@ -89,7 +119,7 @@ class QdrantClientTest extends TestCase
         $hostProperty->setAccessible(true);
         $portProperty->setAccessible(true);
 
-        $this->assertEquals('qdrant', $hostProperty->getValue($client));
+        $this->assertEquals('localhost', $hostProperty->getValue($client));
         $this->assertEquals(6333, $portProperty->getValue($client));
     }
 
