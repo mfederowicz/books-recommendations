@@ -50,3 +50,4 @@ try {
 }
 
 echo "\n🎉 Debug completed!\n";
+
