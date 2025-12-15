@@ -1,6 +1,6 @@
 # System Rekomendacji Książek
 
-![Test Coverage](https://img.shields.io/badge/coverage-63%25-green)
+![Test Coverage](https://img.shields.io/badge/coverage-62%25-green)
 
 Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystująca embeddings OpenAI do dopasowania preferencji użytkowników.
 
