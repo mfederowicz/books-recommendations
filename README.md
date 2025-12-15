@@ -27,6 +27,8 @@ Aplikacja rekomendacji książek oparta na sztucznej inteligencji, wykorzystują
 - ✅ Komenda do czyszczenia danych książek przed embeddingami: `app:clean:ebooks-data`
 - ✅ Komenda do przetwarzania wsadowego embeddingów książek: `app:process:ebook-embeddings`
 - ✅ Migracja embeddingów książek do Qdrant: `app:migrate:ebook-embeddings-to-qdrant`
+- ✅ Aktualizacja rekomendacji książek: `app:recommendations:update --quiet`
+- ✅ Wyszukiwanie książek dla rekomendacji: `app:recommendations:search-books --force`
 - ✅ Testowanie funkcjonalności Qdrant: `app:test:qdrant`
 - ✅ Testowanie embeddingów OpenAI: `app:test:embedding`
 - ✅ Zarządzanie użytkownikami
@@ -224,6 +226,23 @@ server {
 ./bin/run.sh ./bin/phpunit --coverage-text
 ```
 
+### Zarządzanie rekomendacjami:
+```bash
+# Aktualizacja rekomendacji w tle (cron-friendly)
+./bin/run.sh ./bin/console app:recommendations:update --quiet --max-recommendations=500
+
+# Wyszukiwanie książek dla wszystkich rekomendacji
+./bin/run.sh ./bin/console app:recommendations:search-books --force
+
+# Wyszukiwanie książek dla konkretnej rekomendacji
+./bin/run.sh ./bin/console app:recommendations:search-books --recommendation-id=123
+
+# Sucha próba bez zmian w bazie danych
+./bin/run.sh ./bin/console app:recommendations:search-books --dry-run
+
+# Przetwarzanie w partiach (batch processing)
+./bin/run.sh ./bin/console app:recommendations:search-books --batch-size=10 --max-recommendations=50
+```
 
 ### Przygotowanie danych do embeddingów:
 ```bash

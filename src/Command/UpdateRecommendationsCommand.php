@@ -74,11 +74,15 @@ final class UpdateRecommendationsCommand extends Command
             ];
 
             if ($quiet) {
-                $arguments['--no-interaction'] = true;
+                $arguments[] = '--no-interaction'; // Boolean flag as array element
             }
 
             // Execute the search command
-            $exitCode = $command->run(new \Symfony\Component\Console\Input\ArrayInput($arguments), $output);
+            $arrayInput = new \Symfony\Component\Console\Input\ArrayInput($arguments);
+            if ($quiet) {
+                $arrayInput->setInteractive(false); // Disable interaction only when quiet flag is used
+            }
+            $exitCode = $command->run($arrayInput, $output);
 
             if (!$quiet) {
                 if (Command::SUCCESS === $exitCode) {

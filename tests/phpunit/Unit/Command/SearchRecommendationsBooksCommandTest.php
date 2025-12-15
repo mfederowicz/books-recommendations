@@ -51,4 +51,33 @@ class SearchRecommendationsBooksCommandTest extends TestCase
         $this->assertEquals('recommendationService', $parameters[0]->getName());
         $this->assertEquals('entityManager', $parameters[1]->getName());
     }
+
+    public function testCommandDoesNotHaveNoInteractionOption(): void
+    {
+        $command = new SearchRecommendationsBooksCommand(
+            $this->createMock(\App\DTO\RecommendationServiceInterface::class),
+            $this->createMock(\Doctrine\ORM\EntityManagerInterface::class)
+        );
+
+        $definition = $command->getDefinition();
+
+        // This command should not have --no-interaction option as it relies on parent command
+        $this->assertFalse($definition->hasOption('no-interaction'));
+    }
+
+    public function testCommandHasAllRequiredOptions(): void
+    {
+        $command = new SearchRecommendationsBooksCommand(
+            $this->createMock(\App\DTO\RecommendationServiceInterface::class),
+            $this->createMock(\Doctrine\ORM\EntityManagerInterface::class)
+        );
+
+        $definition = $command->getDefinition();
+
+        $this->assertTrue($definition->hasOption('recommendation-id'));
+        $this->assertTrue($definition->hasOption('batch-size'));
+        $this->assertTrue($definition->hasOption('dry-run'));
+        $this->assertTrue($definition->hasOption('force'));
+        $this->assertTrue($definition->hasOption('max-recommendations'));
+    }
 }
