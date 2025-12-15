@@ -73,6 +73,7 @@ final class SearchRecommendationsBooksCommand extends Command
         $dryRun = $input->getOption('dry-run');
         $force = $input->getOption('force');
         $maxRecommendations = $input->getOption('max-recommendations') ? (int) $input->getOption('max-recommendations') : null;
+        $noInteraction = !$input->isInteractive();
 
         $io->title('🔍 Searching Books for Recommendations');
 
@@ -96,7 +97,9 @@ final class SearchRecommendationsBooksCommand extends Command
             // Show summary table
             $this->displayRecommendationsSummary($recommendations, $io);
 
-            if (!$io->confirm('Do you want to proceed with processing these recommendations?', false)) {
+            if ($noInteraction || $io->confirm('Do you want to proceed with processing these recommendations?', false)) {
+                // Proceed with processing
+            } else {
                 $io->info('Operation cancelled by user.');
 
                 return Command::SUCCESS;

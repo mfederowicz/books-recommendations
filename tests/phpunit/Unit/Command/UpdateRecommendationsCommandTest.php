@@ -50,4 +50,26 @@ class UpdateRecommendationsCommandTest extends TestCase
         $this->assertCount(1, $parameters);
         $this->assertEquals('recommendationService', $parameters[0]->getName());
     }
+
+    public function testCommandHasQuietOption(): void
+    {
+        $command = new UpdateRecommendationsCommand(
+            $this->createMock(\App\DTO\RecommendationServiceInterface::class)
+        );
+
+        $definition = $command->getDefinition();
+
+        $this->assertTrue($definition->hasOption('quiet'));
+        $this->assertTrue($definition->hasOption('max-recommendations'));
+        $this->assertTrue($definition->hasOption('batch-size'));
+    }
+
+    public function testCommandCanBeInstantiated(): void
+    {
+        $recommendationService = $this->createMock(\App\DTO\RecommendationServiceInterface::class);
+        $command = new UpdateRecommendationsCommand($recommendationService);
+
+        $this->assertInstanceOf(UpdateRecommendationsCommand::class, $command);
+        $this->assertEquals('app:recommendations:update', $command->getName());
+    }
 }
