@@ -40,3 +40,4 @@ Jeśli cron nie działał przez dłuższy czas:
 # Pełna aktualizacja wszystkich rekomendacji
 ./bin/run.sh ./bin/console app:recommendations:search-books --force --no-interaction
 ```
+

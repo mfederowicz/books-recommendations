@@ -55,3 +55,4 @@ if ($recommendation) {
 }
 
 echo "\n✅ Debug zakończony\n";
+

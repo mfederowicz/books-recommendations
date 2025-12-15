@@ -80,3 +80,4 @@ try {
 }
 
 echo "\n🎉 Test zakończony!\n";
+
