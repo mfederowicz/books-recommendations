@@ -265,4 +265,21 @@ final class RecommendationService implements RecommendationServiceInterface
 
         $this->entityManager->flush();
     }
+
+    private function generateCoverUrl(Ebook $ebook): string
+    {
+        try {
+            $isbnPath = ImageHelper::formatIsbnForImagePath($ebook->getIsbn());
+            $slugifiedTitle = ImageHelper::slugify($ebook->getTitle().'--'.$ebook->getAuthor());
+
+            return sprintf(
+                '//static.swiatczytnikow.pl/img/covers/%s/big/%s.jpg',
+                $isbnPath,
+                $slugifiedTitle
+            );
+        } catch (\InvalidArgumentException $e) {
+            // Fallback if ISBN is invalid
+            return '';
+        }
+    }
 }
